@@ -18,7 +18,7 @@ public class AssociateDefaultMySQLGateway implements AssociateGateway {
     }
 
     @Override
-    public Associate create(Associate anAssociate) {
+    public Associate create(final Associate anAssociate) {
         return this.associateRepository.save(AssociateJpaEntity.from(anAssociate))
                 .toAggregate();
     }
@@ -28,8 +28,9 @@ public class AssociateDefaultMySQLGateway implements AssociateGateway {
         return this.associateRepository.existsByDocument(document);
     }
 
+    // TODO procurar uma API que receba o CPF e retorne se é válido ou não
     @Override
     public boolean isDocumentValid(final String document) {
-        return false;
+        return true;
     }
 }
