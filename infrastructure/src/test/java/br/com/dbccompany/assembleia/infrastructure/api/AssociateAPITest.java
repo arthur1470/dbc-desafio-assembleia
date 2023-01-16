@@ -4,6 +4,8 @@ import br.com.dbccompany.assembleia.ControllerTest;
 import br.com.dbccompany.assembleia.application.associate.create.CreateAssociateCommand;
 import br.com.dbccompany.assembleia.application.associate.create.CreateAssociateOutput;
 import br.com.dbccompany.assembleia.application.associate.create.CreateAssociateUseCase;
+import br.com.dbccompany.assembleia.domain.exceptions.DomainException;
+import br.com.dbccompany.assembleia.domain.validation.Error;
 import br.com.dbccompany.assembleia.infrastructure.associate.models.CreateAssociateRequest;
 import br.com.dbccompany.assembleia.infrastructure.configuration.json.Json;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,7 +20,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.Objects;
 
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
@@ -63,6 +65,47 @@ class AssociateAPITest {
                 MockMvcResultMatchers.header().string("Location", "/associates/123"),
                 MockMvcResultMatchers.header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE),
                 jsonPath("$.id", equalTo("123"))
+        );
+
+        verify(createAssociateUseCase, times(1)).execute(argThat(cmd ->
+                Objects.equals(expectedName, cmd.name())
+                        && Objects.equals(expectedDocument, cmd.document())
+                        && Objects.equals(expectedIsActive, cmd.isActive())
+        ));
+    }
+
+    @Test
+    void givenAnInvalidName_whenCallsCreateAssociate_thenShouldReturnError() throws Exception {
+        // given
+        final String expectedName = null;
+        final var expectedDocument = "12345678901";
+        final var expectedIsActive = true;
+        final var expectedErrorMessage = "'name' should not be null";
+
+        final var aRequest = new CreateAssociateRequest(
+                expectedName,
+                expectedDocument,
+                expectedIsActive
+        );
+
+        when(createAssociateUseCase.execute(any()))
+                .thenThrow(DomainException.with(new Error(expectedErrorMessage)));
+
+        // when
+        final var request = MockMvcRequestBuilders.post("/associates")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(Json.writeValueAsString(aRequest));
+
+        final var response = this.mvc.perform(request)
+                .andDo(MockMvcResultHandlers.print());
+
+        // then
+        response.andExpectAll(
+                status().isUnprocessableEntity(),
+                MockMvcResultMatchers.header().string("Location", nullValue()),
+                MockMvcResultMatchers.header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE),
+                jsonPath("$.errors", hasSize(1)),
+                jsonPath("$.errors[0].message", equalTo(expectedErrorMessage))
         );
 
         verify(createAssociateUseCase, times(1)).execute(argThat(cmd ->
