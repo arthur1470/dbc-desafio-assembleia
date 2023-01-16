@@ -1,0 +1,18 @@
+version: '3.7'
+
+services:
+  mysql:
+    container_name: assembleia_mysql
+    image: mysql:latest
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=assembleia
+    security_opt:
+      - seccomp:unconfined
+    ports:
+      - 3306:3306
+    networks:
+      - assembleia_network
+
+networks:
+  assembleia_network:
