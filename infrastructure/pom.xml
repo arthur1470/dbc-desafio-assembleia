@@ -84,11 +84,18 @@
     </dependencies>
 
     <build>
+        <directory>${project.basedir}/../libs</directory>
+        <finalName>application</finalName>
         <plugins>
             <plugin>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
                 <version>8.5.13</version>
+                <configuration>
+                    <url>jdbc:mysql://localhost:3306/assembleia</url>
+                    <user>root</user>
+                    <password>123456</password>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
