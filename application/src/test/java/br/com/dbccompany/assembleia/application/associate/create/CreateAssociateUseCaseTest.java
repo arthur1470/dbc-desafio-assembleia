@@ -135,6 +135,39 @@ class CreateAssociateUseCaseTest {
     }
 
     @Test
+    void givenAnInvalidDocument_whenCallsCreateAssociate_shouldThrowDomainException() {
+        // given
+        final var expectedName = "Joao da Silva";
+        final var expectedDocument = "12345678911";
+        final var expectedIsActive = true;
+        final var expectedErrorCount = 1;
+        final var expectedErrorMessage = "'document' 12345678911 is invalid";
+
+        final var aCommand = CreateAssociateCommand.with(
+                expectedName,
+                expectedDocument,
+                expectedIsActive
+        );
+
+        when(associateGateway.existsByDocument(any()))
+                .thenReturn(false);
+
+        when(associateGateway.isDocumentValid(any()))
+                .thenReturn(false);
+
+        // when
+        final var actualException = assertThrows(
+                DomainException.class,
+                () -> useCase.execute(aCommand)
+        );
+
+        // then
+        assertNotNull(actualException);
+        assertEquals(expectedErrorCount, actualException.getErrors().size());
+        assertEquals(expectedErrorMessage, actualException.getErrors().get(0).message());
+    }
+
+    @Test
     void givenAnInvalidNullName_whenCallsCreateAssociate_shouldThrowDomainException() {
         // given
         final var expectedDocument = "12345678911";
