@@ -9,6 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
+    <groupId>br.com.dbccompany.assembleia</groupId>
     <artifactId>domain</artifactId>
 
     <properties>
