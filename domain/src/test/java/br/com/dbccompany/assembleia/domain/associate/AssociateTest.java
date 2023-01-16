@@ -1,5 +1,7 @@
 package br.com.dbccompany.assembleia.domain.associate;
 
+import br.com.dbccompany.assembleia.domain.exceptions.DomainException;
+import br.com.dbccompany.assembleia.domain.utils.InstantUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -67,7 +69,7 @@ class AssociateTest {
 
         // when
         final var actualAssociate = Assertions.assertDoesNotThrow(
-                () -> anAssociate.clone().deactivate()
+                () -> anAssociate.createClone().deactivate()
         );
 
         // then
@@ -91,12 +93,12 @@ class AssociateTest {
 
         final var anAssociate = Associate.newAssociate(expectedName, expectedDocument, false);
 
-        Assertions.assertTrue(anAssociate.isActive());
-        Assertions.assertNull(anAssociate.getDeletedAt());
+        Assertions.assertFalse(anAssociate.isActive());
+        Assertions.assertNotNull(anAssociate.getDeletedAt());
 
         // when
         final var actualAssociate = Assertions.assertDoesNotThrow(
-                () -> anAssociate.clone().activate()
+                () -> anAssociate.createClone().activate()
         );
 
         // then
@@ -178,6 +180,44 @@ class AssociateTest {
     }
 
     @Test
+    void givenAnInvalidNullDocument_whenCallNewAssociate_thenShouldThrowDomainException() {
+        final var expectedName = "Joao da Silva";
+        final String expectedDocument = null;
+        final var expectedIsActive = true;
+        final var expectedErrorCount = 1;
+        final var expectedErrorMessage = "'document' should not be null";
+
+        // when
+        final var actualException = Assertions.assertThrows(
+                DomainException.class,
+                () -> Associate.newAssociate(expectedName, expectedDocument, expectedIsActive)
+        );
+
+        // then
+        Assertions.assertEquals(expectedErrorCount, actualException.getErrors().size());
+        Assertions.assertEquals(expectedErrorMessage, actualException.getErrors().get(0).message());
+    }
+
+    @Test
+    void givenAnInvalidEmptyDocument_whenCallNewAssociate_thenShouldThrowDomainException() {
+        final var expectedName = "Joao da Silva";
+        final var expectedDocument = "  ";
+        final var expectedIsActive = true;
+        final var expectedErrorCount = 1;
+        final var expectedErrorMessage = "'document' should not be empty";
+
+        // when
+        final var actualException = Assertions.assertThrows(
+                DomainException.class,
+                () -> Associate.newAssociate(expectedName, expectedDocument, expectedIsActive)
+        );
+
+        // then
+        Assertions.assertEquals(expectedErrorCount, actualException.getErrors().size());
+        Assertions.assertEquals(expectedErrorMessage, actualException.getErrors().get(0).message());
+    }
+
+    @Test
     void givenAnInvalidDocumentLengthMoreThan11_whenCallNewAssociate_thenShouldThrowDomainException() {
         final var expectedName = "Joao da Silva";
         final var expectedDocument = "123456789112";
@@ -216,13 +256,49 @@ class AssociateTest {
     }
 
     @Test
+    void givenAnInvalidParamsWithNullAuditoryDates_whenCallAssociateWith_thenShouldThrowDomainException() {
+        final var expectedId = AssociateID.from("123");
+        final var expectedName = "Joao da Silva";
+        final var expectedDocument = "12345678901";
+        final var expectedIsActive = false;
+        final Instant expectedCreatedAt = null;
+        final Instant expectedUpdatedAt = null;
+        final Instant expectedDeletedAt = null;
+
+        final var expectedErrorCount = 3;
+        final var expectedErrorMessage1 = "'createdAt' should not be null";
+        final var expectedErrorMessage2 = "'updatedAt' should not be null";
+        final var expectedErrorMessage3 = "'deletedAt' should not be null when associate is inactive";
+
+        // when
+        final var actualException = Assertions.assertThrows(
+                DomainException.class,
+                () -> Associate.with(
+                        expectedId,
+                        expectedName,
+                        expectedDocument,
+                        expectedIsActive,
+                        expectedCreatedAt,
+                        expectedUpdatedAt,
+                        expectedDeletedAt
+                )
+        );
+
+        // then
+        Assertions.assertEquals(expectedErrorCount, actualException.getErrors().size());
+        Assertions.assertEquals(expectedErrorMessage1, actualException.getErrors().get(0).message());
+        Assertions.assertEquals(expectedErrorMessage2, actualException.getErrors().get(1).message());
+        Assertions.assertEquals(expectedErrorMessage3, actualException.getErrors().get(2).message());
+    }
+
+    @Test
     void givenAnInvalidInactiveAssociateWithNullDeletedAt_whenCallAssociateWith_thenShouldThrowDomainException() {
         final var expectedId = AssociateID.from("123");
         final var expectedName = "Joao da Silva";
         final var expectedDocument = "12345678901";
         final var expectedIsActive = false;
-        final var expectedCreatedAt = Instant.now();
-        final var expectedUpdatedAt = Instant.now();
+        final var expectedCreatedAt = InstantUtils.now();
+        final var expectedUpdatedAt = InstantUtils.now();
         final Instant expectedDeletedAt = null;
 
         final var expectedErrorCount = 1;
