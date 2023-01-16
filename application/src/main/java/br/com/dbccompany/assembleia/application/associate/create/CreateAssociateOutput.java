@@ -10,4 +10,10 @@ public record CreateAssociateOutput(
                 anAssociate.getId().getValue()
         );
     }
+
+    public static CreateAssociateOutput from(final String anId) {
+        return new CreateAssociateOutput(
+                anId
+        );
+    }
 }
