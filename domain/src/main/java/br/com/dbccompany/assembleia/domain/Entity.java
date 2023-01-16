@@ -10,6 +10,8 @@ public abstract class Entity<ID extends Identifier> {
         this.id = Objects.requireNonNull(id, "'id' should not be null");
     }
 
+    public abstract void validate();
+
     public ID getId() {
         return this.id;
     }
