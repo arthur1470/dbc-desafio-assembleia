@@ -2,10 +2,12 @@ package br.com.dbccompany.assembleia.application.associate.create;
 
 import br.com.dbccompany.assembleia.domain.associate.AssociateGateway;
 import br.com.dbccompany.assembleia.domain.exceptions.DomainException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Objects;
@@ -20,9 +22,14 @@ import static org.mockito.Mockito.*;
 class CreateAssociateUseCaseTest {
 
     @InjectMocks
-    DefaultCreateAssociateUseCase useCase;
+    private DefaultCreateAssociateUseCase useCase;
     @Mock
-    AssociateGateway associateGateway;
+    private AssociateGateway associateGateway;
+
+    @BeforeEach
+    void cleanUp() {
+        Mockito.reset(associateGateway);
+    }
 
     @Test
     void givenAValidCommand_whenCallsCreateAssociate_shouldReturnAssociateId() {
