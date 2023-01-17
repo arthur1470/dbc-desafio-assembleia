@@ -1,0 +1,4 @@
+rootProject.name = 'assembleia'
+include 'domain'
+include 'application'
+include 'infrastructure'
