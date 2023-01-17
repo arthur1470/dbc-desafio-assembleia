@@ -111,8 +111,88 @@ class CreateAgendaUseCaseTest {
                 true
         );
 
-        when(agendaGateway.create(any()))
-                .thenAnswer(returnsFirstArg());
+        // when
+        final var actualException = assertThrows(
+                DomainException.class,
+                () -> useCase.execute(aCommand)
+        );
+
+        // then
+        assertNotNull(actualException);
+        assertEquals(expectedErrorCount, actualException.getErrors().size());
+        assertEquals(expectedErrorMessage, actualException.getErrors().get(0).message());
+        verify(agendaGateway, times(0)).create(any());
+    }
+
+
+    @Test
+    void givenAnInvalidCommandWithEmptyName_whenCallsCreateAgenda_shouldThrowDomainException() {
+        // given
+        final var expectedErrorCount = 1;
+        final var expectedErrorMessage = "'name' should not be empty";
+
+        final var aCommand = CreateAgendaCommand.with(
+                "  ",
+                "Pauta muito importante",
+                true
+        );
+
+        // when
+        final var actualException = assertThrows(
+                DomainException.class,
+                () -> useCase.execute(aCommand)
+        );
+
+        // then
+        assertNotNull(actualException);
+        assertEquals(expectedErrorCount, actualException.getErrors().size());
+        assertEquals(expectedErrorMessage, actualException.getErrors().get(0).message());
+        verify(agendaGateway, times(0)).create(any());
+    }
+
+    @Test
+    void givenAnInvalidCommandWithNameLessThan3_whenCallsCreateAgenda_shouldThrowDomainException() {
+        // given
+        final var expectedErrorCount = 1;
+        final var expectedErrorMessage = "'name' must be between 3 and 255 characters";
+
+        final var aCommand = CreateAgendaCommand.with(
+                "12",
+                "Pauta muito importante",
+                true
+        );
+
+        // when
+        final var actualException = assertThrows(
+                DomainException.class,
+                () -> useCase.execute(aCommand)
+        );
+
+        // then
+        assertNotNull(actualException);
+        assertEquals(expectedErrorCount, actualException.getErrors().size());
+        assertEquals(expectedErrorMessage, actualException.getErrors().get(0).message());
+        verify(agendaGateway, times(0)).create(any());
+    }
+
+    @Test
+    void givenAnInvalidCommandWithNameMoreThan255_whenCallsCreateAgenda_shouldThrowDomainException() {
+        // given
+        final var anInvalidName = """
+                dasmkdasdklasdkasklmdaskmldmksadasdasdaudhaiudhsuhffdsiojaioj
+                fdsklnfdsafndslkfnasdlkfnksdlfnfdsijfjioasifjoadsijofdjisoafij
+                fnsdfndskjfnaskdfndskjfnkjnfnsdkfsdfhidashufdsuhfhdsiufhsdiuf
+                fnsdjkfndksajnfkdjsnfksdnkjfnajsfhsdfhsduhfisudfhiasdhfdshuhfu
+                fnsdjkfndksajnfkdjsnfksdnkjfnajsfhsdfhsduhfisudfhiasdhfdshuhfu
+                """;
+        final var expectedErrorCount = 1;
+        final var expectedErrorMessage = "'name' must be between 3 and 255 characters";
+
+        final var aCommand = CreateAgendaCommand.with(
+                anInvalidName,
+                "Pauta muito importante",
+                true
+        );
 
         // when
         final var actualException = assertThrows(
