@@ -3,6 +3,7 @@ package br.com.dbccompany.assembleia.application.agenda.retrieve.get;
 import br.com.dbccompany.assembleia.domain.agenda.Agenda;
 import br.com.dbccompany.assembleia.domain.agenda.AgendaGateway;
 import br.com.dbccompany.assembleia.domain.agenda.AgendaID;
+import br.com.dbccompany.assembleia.domain.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
