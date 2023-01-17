@@ -162,13 +162,20 @@ class AgendaTest {
     @Test
     void givenAnInvalidNameLengthMoreThan255_whenCallNewAgenda_thenShouldThrowDomainException() {
         // given
+        final var anInvalidName = """
+                dasmkdasdklasdkasklmdaskmldmksadasdasdaudhaiudhsuhffdsiojaioj
+                fdsklnfdsafndslkfnasdlkfnksdlfnfdsijfjioasifjoadsijofdjisoafij
+                fnsdfndskjfnaskdfndskjfnkjnfnsdkfsdfhidashufdsuhfhdsiufhsdiuf
+                fnsdjkfndksajnfkdjsnfksdnkjfnajsfhsdfhsduhfisudfhiasdhfdshuhfu
+                fnsdjkfndksajnfkdjsnfksdnkjfnajsfhsdfhsduhfisudfhiasdhfdshuhfu
+                """;
         final var expectedErrorCount = 1;
         final var expectedErrorMessage = "'name' must be between 3 and 255 characters";
 
         // when
         final var actualException = Assertions.assertThrows(
                 DomainException.class,
-                () -> Agenda.newAgenda("12", "uma descricao", true)
+                () -> Agenda.newAgenda(anInvalidName, "uma descricao", true)
         );
 
         // then
