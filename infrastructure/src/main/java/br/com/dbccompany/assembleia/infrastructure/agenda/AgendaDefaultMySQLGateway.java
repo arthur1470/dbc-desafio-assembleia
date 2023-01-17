@@ -22,7 +22,7 @@ import static br.com.dbccompany.assembleia.infrastructure.utils.SpecificationUti
 public class AgendaDefaultMySQLGateway implements AgendaGateway {
     private final AgendaRepository agendaRepository;
 
-    public AgendaDefaultMySQLGateway(AgendaRepository agendaRepository) {
+    public AgendaDefaultMySQLGateway(final AgendaRepository agendaRepository) {
         this.agendaRepository = Objects.requireNonNull(agendaRepository);
     }
 
