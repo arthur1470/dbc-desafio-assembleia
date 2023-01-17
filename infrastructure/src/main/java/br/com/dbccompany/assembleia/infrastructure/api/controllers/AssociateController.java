@@ -5,7 +5,7 @@ import br.com.dbccompany.assembleia.application.associate.create.CreateAssociate
 import br.com.dbccompany.assembleia.infrastructure.api.AssociateAPI;
 import br.com.dbccompany.assembleia.infrastructure.associate.models.CreateAssociateRequest;
 import br.com.dbccompany.assembleia.infrastructure.associate.models.CreateAssociateResponse;
-import br.com.dbccompany.assembleia.infrastructure.associate.presenters.AssociatePresenter;
+import br.com.dbccompany.assembleia.infrastructure.associate.presenters.AssociateApiPresenter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,7 +32,7 @@ public class AssociateController implements AssociateAPI {
         );
 
         final var response =
-                AssociatePresenter.present(createAssociateUseCase.execute(aCommand));
+                AssociateApiPresenter.present(createAssociateUseCase.execute(aCommand));
 
         return ResponseEntity
                 .created(URI.create("/associates/%s".formatted(response.id())))
