@@ -2,15 +2,15 @@ package br.com.dbccompany.assembleia.infrastructure.agenda.persistence;
 
 import br.com.dbccompany.assembleia.domain.agenda.Agenda;
 import br.com.dbccompany.assembleia.domain.agenda.AgendaID;
+import br.com.dbccompany.assembleia.domain.agenda.votesession.VoteSession;
+import br.com.dbccompany.assembleia.infrastructure.agenda.votesession.persistence.VoteSessionJpaEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.Instant;
+import java.util.Optional;
 
 @Entity(name = "Agenda")
-@Table(name = "agenda")
+@Table(name = "agendas")
 public class AgendaJpaEntity {
 
     @Id
@@ -28,6 +28,10 @@ public class AgendaJpaEntity {
     @Column(name = "deleted_at", columnDefinition = "DATETIME(6)")
     private Instant deletedAt;
 
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "vote_session_id")
+    private VoteSessionJpaEntity voteSession;
+
     public AgendaJpaEntity() {}
 
     public AgendaJpaEntity(
@@ -37,7 +41,8 @@ public class AgendaJpaEntity {
             final boolean active,
             final Instant createdAt,
             final Instant updatedAt,
-            final Instant deletedAt
+            final Instant deletedAt,
+            final VoteSessionJpaEntity voteSession
     ) {
         this.id = id;
         this.name = name;
@@ -46,9 +51,14 @@ public class AgendaJpaEntity {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.deletedAt = deletedAt;
+        this.voteSession = voteSession;
     }
 
     public static AgendaJpaEntity from(final Agenda anAgenda) {
+        final var aVoteSession = Optional.ofNullable(anAgenda.getVoteSession())
+                .map(VoteSessionJpaEntity::from)
+                .orElse(null);
+
         return new AgendaJpaEntity(
                 anAgenda.getId().getValue(),
                 anAgenda.getName(),
@@ -56,7 +66,8 @@ public class AgendaJpaEntity {
                 anAgenda.isActive(),
                 anAgenda.getCreatedAt(),
                 anAgenda.getUpdatedAt(),
-                anAgenda.getDeletedAt()
+                anAgenda.getDeletedAt(),
+                aVoteSession
         );
     }
 
@@ -68,7 +79,8 @@ public class AgendaJpaEntity {
                 this.isActive(),
                 this.getCreatedAt(),
                 this.getUpdatedAt(),
-                this.getDeletedAt()
+                this.getDeletedAt(),
+                this.voteSession == null ? null : voteSession.toDomain()
         );
     }
 

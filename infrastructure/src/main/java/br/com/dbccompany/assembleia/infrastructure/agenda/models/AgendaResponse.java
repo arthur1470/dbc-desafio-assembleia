@@ -11,6 +11,9 @@ public record AgendaResponse(
         @JsonProperty("is_active") Boolean active,
         @JsonProperty("created_at") Instant createdAt,
         @JsonProperty("updated_at") Instant updatedAt,
-        @JsonProperty("deleted_at") Instant deletedAt
+        @JsonProperty("deleted_at") Instant deletedAt,
+        @JsonProperty("is_vote_session_active") boolean isVoteSessionActive,
+        @JsonProperty("vote_session_end_at") Instant voteSessionEndAt,
+        @JsonProperty("votes") AgendaVotesResponse votes
 ) {
 }

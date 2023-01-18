@@ -6,6 +6,12 @@ import br.com.dbccompany.assembleia.application.agenda.retrieve.get.DefaultGetAg
 import br.com.dbccompany.assembleia.application.agenda.retrieve.get.GetAgendaByIdUseCase;
 import br.com.dbccompany.assembleia.application.agenda.retrieve.list.DefaultListAgendasUseCase;
 import br.com.dbccompany.assembleia.application.agenda.retrieve.list.ListAgendasUseCase;
+import br.com.dbccompany.assembleia.application.agenda.vote.create.CreateAgendaVoteUseCase;
+import br.com.dbccompany.assembleia.application.agenda.vote.create.DefaultCreateAgendaVoteUseCase;
+import br.com.dbccompany.assembleia.application.agenda.vote.retrieve.list.DefaultListAgendaVotesUseCase;
+import br.com.dbccompany.assembleia.application.agenda.vote.retrieve.list.ListAgendaVotesUseCase;
+import br.com.dbccompany.assembleia.application.agenda.votesession.create.CreateAgendaVoteSessionUseCase;
+import br.com.dbccompany.assembleia.application.agenda.votesession.create.DefaultCreateAgendaVoteSessionUseCase;
 import br.com.dbccompany.assembleia.application.associate.create.CreateAssociateUseCase;
 import br.com.dbccompany.assembleia.application.associate.create.DefaultCreateAssociateUseCase;
 import br.com.dbccompany.assembleia.domain.agenda.AgendaGateway;
@@ -45,5 +51,20 @@ public class UseCaseConfig {
     @Bean
     public ListAgendasUseCase listAgendasUseCase() {
         return new DefaultListAgendasUseCase(agendaGateway);
+    }
+
+    @Bean
+    public CreateAgendaVoteUseCase createAgendaVoteUseCase() {
+        return new DefaultCreateAgendaVoteUseCase(agendaGateway, associateGateway);
+    }
+
+    @Bean
+    public CreateAgendaVoteSessionUseCase createAgendaVoteSessionUseCase() {
+        return new DefaultCreateAgendaVoteSessionUseCase(agendaGateway);
+    }
+
+    @Bean
+    public ListAgendaVotesUseCase listAgendaVotesUseCase() {
+        return new DefaultListAgendaVotesUseCase(agendaGateway);
     }
 }

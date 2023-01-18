@@ -10,7 +10,7 @@ import javax.persistence.Table;
 import java.time.Instant;
 
 @Entity(name = "Associate")
-@Table(name = "associate")
+@Table(name = "associates")
 public class AssociateJpaEntity {
 
     @Id
@@ -30,15 +30,18 @@ public class AssociateJpaEntity {
 
     public AssociateJpaEntity() {
     }
+    public AssociateJpaEntity(final String id) {
+        this.id = id;
+    }
 
     public AssociateJpaEntity(
-            String id,
-            String name,
-            String document,
-            boolean active,
-            Instant createdAt,
-            Instant updatedAt,
-            Instant deletedAt
+            final String id,
+            final String name,
+            final String document,
+            final boolean active,
+            final Instant createdAt,
+            final Instant updatedAt,
+            final Instant deletedAt
     ) {
         this.id = id;
         this.name = name;
@@ -58,6 +61,12 @@ public class AssociateJpaEntity {
                 anAssociate.getCreatedAt(),
                 anAssociate.getUpdatedAt(),
                 anAssociate.getDeletedAt()
+        );
+    }
+
+    public static AssociateJpaEntity from(final AssociateID anId) {
+        return new AssociateJpaEntity(
+                anId.getValue()
         );
     }
 
