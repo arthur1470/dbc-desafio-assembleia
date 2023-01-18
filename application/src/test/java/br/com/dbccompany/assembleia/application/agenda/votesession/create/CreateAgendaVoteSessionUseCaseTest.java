@@ -6,10 +6,12 @@ import br.com.dbccompany.assembleia.domain.agenda.AgendaID;
 import br.com.dbccompany.assembleia.domain.exceptions.DomainException;
 import br.com.dbccompany.assembleia.domain.exceptions.NotFoundException;
 import br.com.dbccompany.assembleia.domain.utils.InstantUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Objects;
@@ -28,6 +30,11 @@ class CreateAgendaVoteSessionUseCaseTest {
     private DefaultCreateAgendaVoteSessionUseCase useCase;
     @Mock
     private AgendaGateway agendaGateway;
+
+    @BeforeEach
+    void cleanUp() {
+        Mockito.reset(agendaGateway);
+    }
 
     @Test
     void givenAValidCommand_whenCallsCreateAgendaVoteSession_shouldReturnVoteSessionId() {
