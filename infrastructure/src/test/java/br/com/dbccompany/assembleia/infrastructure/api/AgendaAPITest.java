@@ -7,8 +7,14 @@ import br.com.dbccompany.assembleia.application.agenda.retrieve.get.AgendaOutput
 import br.com.dbccompany.assembleia.application.agenda.retrieve.get.GetAgendaByIdUseCase;
 import br.com.dbccompany.assembleia.application.agenda.retrieve.list.AgendaListOutput;
 import br.com.dbccompany.assembleia.application.agenda.retrieve.list.ListAgendasUseCase;
+import br.com.dbccompany.assembleia.application.agenda.vote.create.CreateAgendaVoteUseCase;
+import br.com.dbccompany.assembleia.application.agenda.vote.retrieve.list.ListAgendaVotesUseCase;
+import br.com.dbccompany.assembleia.application.agenda.votesession.create.CreateAgendaVoteSessionUseCase;
 import br.com.dbccompany.assembleia.domain.agenda.Agenda;
 import br.com.dbccompany.assembleia.domain.agenda.AgendaID;
+import br.com.dbccompany.assembleia.domain.agenda.vote.Vote;
+import br.com.dbccompany.assembleia.domain.agenda.vote.VoteType;
+import br.com.dbccompany.assembleia.domain.associate.AssociateID;
 import br.com.dbccompany.assembleia.domain.exceptions.DomainException;
 import br.com.dbccompany.assembleia.domain.exceptions.NotFoundException;
 import br.com.dbccompany.assembleia.domain.pagination.Pagination;
@@ -25,6 +31,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 
@@ -46,6 +53,12 @@ class AgendaAPITest {
     private GetAgendaByIdUseCase getAgendaByIdUseCase;
     @MockBean
     private ListAgendasUseCase listAgendasUseCase;
+    @MockBean
+    private CreateAgendaVoteSessionUseCase createAgendaVoteSessionUseCase;
+    @MockBean
+    private CreateAgendaVoteUseCase createAgendaVoteUseCase;
+    @MockBean
+    private ListAgendaVotesUseCase listAgendaVotesUseCase;
 
     @Test
     void givenAValidCommand_whenCallsCreateAgenda_shouldReturnAgendaId() throws Exception {
@@ -133,12 +146,16 @@ class AgendaAPITest {
         final var expectedName = "Agenda Importante";
         final var expectedDescription = "Essa é uma pauta muito importante que todos devem votar!";
         final var expectedIsActive = true;
+        final var expectedVoteSessionEnd = Instant.now().plusSeconds(30);
 
         final var anAgenda = Agenda.newAgenda(
                 expectedName,
                 expectedDescription,
                 expectedIsActive
-        );
+        )
+                .startVoteSession(expectedVoteSessionEnd)
+                .addVote(Vote.newVote(VoteType.YES, AssociateID.from("123")));
+
         final var expectedId = anAgenda.getId().getValue();
 
         Mockito.when(getAgendaByIdUseCase.execute(any()))
@@ -162,7 +179,14 @@ class AgendaAPITest {
                 jsonPath("$.is_active", equalTo(expectedIsActive)),
                 jsonPath("$.created_at", equalTo(anAgenda.getCreatedAt().toString())),
                 jsonPath("$.updated_at", equalTo(anAgenda.getUpdatedAt().toString())),
-                jsonPath("$.deleted_at", equalTo(anAgenda.getDeletedAt()))
+                jsonPath("$.deleted_at", equalTo(anAgenda.getDeletedAt())),
+                jsonPath("$.is_vote_session_active", equalTo(true)),
+                jsonPath("$.vote_session_end_at", equalTo(expectedVoteSessionEnd.toString())),
+                jsonPath("$.votes.total_votes", equalTo(1)),
+                jsonPath("$.votes.yes_votes", equalTo(1)),
+                jsonPath("$.votes.no_votes", equalTo(0)),
+                jsonPath("$.votes.yes_votes_percentage", equalTo("100,00")),
+                jsonPath("$.votes.no_votes_percentage", equalTo("0,00"))
         );
 
         Mockito.verify(getAgendaByIdUseCase, times(1)).execute(expectedId);
