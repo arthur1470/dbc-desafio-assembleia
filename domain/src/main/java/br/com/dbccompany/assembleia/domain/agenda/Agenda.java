@@ -1,6 +1,9 @@
 package br.com.dbccompany.assembleia.domain.agenda;
 
 import br.com.dbccompany.assembleia.domain.AggregateRoot;
+import br.com.dbccompany.assembleia.domain.agenda.vote.Vote;
+import br.com.dbccompany.assembleia.domain.agenda.votesession.VoteSession;
+import br.com.dbccompany.assembleia.domain.exceptions.DomainException;
 import br.com.dbccompany.assembleia.domain.utils.InstantUtils;
 
 import java.time.Instant;
@@ -13,6 +16,7 @@ public class Agenda extends AggregateRoot<AgendaID> {
     private Instant createdAt;
     private Instant updatedAt;
     private Instant deletedAt;
+    private VoteSession voteSession;
 
     private Agenda(
             final AgendaID anId,
@@ -21,7 +25,8 @@ public class Agenda extends AggregateRoot<AgendaID> {
             final boolean isActive,
             final Instant aCreationDate,
             final Instant anUpdateDate,
-            final Instant aDeleteDate
+            final Instant aDeleteDate,
+            final VoteSession voteSession
     ) {
         super(anId);
         this.name = aName;
@@ -30,6 +35,7 @@ public class Agenda extends AggregateRoot<AgendaID> {
         this.createdAt = aCreationDate;
         this.updatedAt = anUpdateDate;
         this.deletedAt = aDeleteDate;
+        this.voteSession = voteSession;
 
         this.validate();
     }
@@ -51,7 +57,8 @@ public class Agenda extends AggregateRoot<AgendaID> {
                 isActive,
                 now,
                 now,
-                deletedAt
+                deletedAt,
+                null
         );
     }
 
@@ -62,7 +69,8 @@ public class Agenda extends AggregateRoot<AgendaID> {
             final boolean isActive,
             final Instant aCreationDate,
             final Instant anUpdateDate,
-            final Instant aDeleteDate
+            final Instant aDeleteDate,
+            final VoteSession aVoteSession
     ) {
         return new Agenda(
                 anId,
@@ -71,7 +79,8 @@ public class Agenda extends AggregateRoot<AgendaID> {
                 isActive,
                 aCreationDate,
                 anUpdateDate,
-                aDeleteDate
+                aDeleteDate,
+                aVoteSession
         );
     }
 
@@ -83,8 +92,30 @@ public class Agenda extends AggregateRoot<AgendaID> {
                 anAgenda.isActive(),
                 anAgenda.getCreatedAt(),
                 anAgenda.getUpdatedAt(),
-                anAgenda.getDeletedAt()
+                anAgenda.getDeletedAt(),
+                anAgenda.getVoteSession()
         );
+    }
+
+    public Agenda startVoteSession(final Instant anEndDate) {
+        if (this.voteSession != null) {
+            throw DomainException.with("This agenda already has a voting session");
+        }
+
+        this.voteSession = VoteSession.newVoteSession(anEndDate);
+        this.updatedAt = InstantUtils.now();
+        return this;
+    }
+
+    public Agenda addVote(final Vote aVote) {
+        boolean isVoteSessionInvalid = this.voteSession == null || this.voteSession.getEndedAt().isBefore(InstantUtils.now());
+        if (isVoteSessionInvalid) {
+            throw DomainException.with("This agenda does not have an active voting session");
+        }
+
+        this.voteSession.addVote(aVote);
+        this.updatedAt = InstantUtils.now();
+        return this;
     }
 
     public Agenda activate() {
@@ -132,5 +163,9 @@ public class Agenda extends AggregateRoot<AgendaID> {
 
     public Instant getDeletedAt() {
         return deletedAt;
+    }
+
+    public VoteSession getVoteSession() {
+        return voteSession;
     }
 }
