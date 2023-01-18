@@ -55,17 +55,17 @@ class CreateAgendaVoteSessionUseCaseTest {
         assertNotNull(actualOutput);
         assertNotNull(actualOutput.id());
 
-        verify(agendaGateway, times(1)).create(argThat(anAssociate ->
-                Objects.equals(expectedName, anAssociate.getName())
-                        && Objects.equals(expectedDescription, anAssociate.getDescription())
-                        && Objects.equals(expectedIsActive, anAssociate.isActive())
-                        && Objects.nonNull(anAssociate.getId())
-                        && Objects.nonNull(anAssociate.getCreatedAt())
-                        && Objects.nonNull(anAssociate.getUpdatedAt())
-                        && Objects.isNull(anAssociate.getDeletedAt())
-                        && Objects.nonNull(anAssociate.getVoteSession())
-                        && Objects.nonNull(anAssociate.getVoteSession().getStartedAt())
-                        && Objects.nonNull(anAssociate.getVoteSession().getEndedAt())
+        verify(agendaGateway, times(1)).create(argThat(agenda ->
+                Objects.equals(expectedName, agenda.getName())
+                        && Objects.equals(expectedDescription, agenda.getDescription())
+                        && Objects.equals(expectedIsActive, agenda.isActive())
+                        && Objects.nonNull(agenda.getId())
+                        && Objects.nonNull(agenda.getCreatedAt())
+                        && Objects.nonNull(agenda.getUpdatedAt())
+                        && Objects.isNull(agenda.getDeletedAt())
+                        && Objects.nonNull(agenda.getVoteSession())
+                        && Objects.nonNull(agenda.getVoteSession().getStartedAt())
+                        && Objects.nonNull(agenda.getVoteSession().getEndedAt())
         ));
     }
 
