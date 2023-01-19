@@ -83,6 +83,6 @@ public class VoteSession extends Entity<VoteSessionID> {
     }
 
     public Set<Vote> getVotes() {
-        return Collections.unmodifiableSet(votes);
+        return votes != null ? Collections.unmodifiableSet(votes) : Collections.emptySet();
     }
 }
