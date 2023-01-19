@@ -10,4 +10,10 @@ public record CreateAgendaVoteOutput(
                 aVote.getId().getValue()
         );
     }
+
+    public static CreateAgendaVoteOutput from(final String anId) {
+        return new CreateAgendaVoteOutput(
+                anId
+        );
+    }
 }

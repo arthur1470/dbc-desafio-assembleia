@@ -8,4 +8,8 @@ public record CreateAgendaVoteSessionOutput(
     public static CreateAgendaVoteSessionOutput from(final Agenda agenda) {
         return new CreateAgendaVoteSessionOutput(agenda.getVoteSession().getId().getValue());
     }
+
+    public static CreateAgendaVoteSessionOutput from(final String anId) {
+        return new CreateAgendaVoteSessionOutput(anId);
+    }
 }

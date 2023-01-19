@@ -6,12 +6,14 @@ import br.com.dbccompany.assembleia.domain.associate.AssociateID;
 import java.time.Instant;
 
 public record AgendaVotesListOutput(
+        String id,
         String vote,
         Instant createdAt,
         AssociateID associateId
 ) {
     public static AgendaVotesListOutput from(final Vote aVote) {
         return new AgendaVotesListOutput(
+                aVote.getId().getValue(),
                 aVote.getVote().name(),
                 aVote.getCreatedAt(),
                 aVote.getAssociate()

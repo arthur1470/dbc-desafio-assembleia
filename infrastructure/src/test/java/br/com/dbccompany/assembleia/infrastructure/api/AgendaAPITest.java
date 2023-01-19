@@ -7,8 +7,11 @@ import br.com.dbccompany.assembleia.application.agenda.retrieve.get.AgendaOutput
 import br.com.dbccompany.assembleia.application.agenda.retrieve.get.GetAgendaByIdUseCase;
 import br.com.dbccompany.assembleia.application.agenda.retrieve.list.AgendaListOutput;
 import br.com.dbccompany.assembleia.application.agenda.retrieve.list.ListAgendasUseCase;
+import br.com.dbccompany.assembleia.application.agenda.vote.create.CreateAgendaVoteOutput;
 import br.com.dbccompany.assembleia.application.agenda.vote.create.CreateAgendaVoteUseCase;
+import br.com.dbccompany.assembleia.application.agenda.vote.retrieve.list.AgendaVotesListOutput;
 import br.com.dbccompany.assembleia.application.agenda.vote.retrieve.list.ListAgendaVotesUseCase;
+import br.com.dbccompany.assembleia.application.agenda.votesession.create.CreateAgendaVoteSessionOutput;
 import br.com.dbccompany.assembleia.application.agenda.votesession.create.CreateAgendaVoteSessionUseCase;
 import br.com.dbccompany.assembleia.domain.agenda.Agenda;
 import br.com.dbccompany.assembleia.domain.agenda.AgendaID;
@@ -20,6 +23,8 @@ import br.com.dbccompany.assembleia.domain.exceptions.NotFoundException;
 import br.com.dbccompany.assembleia.domain.pagination.Pagination;
 import br.com.dbccompany.assembleia.domain.validation.Error;
 import br.com.dbccompany.assembleia.infrastructure.agenda.models.CreateAgendaRequest;
+import br.com.dbccompany.assembleia.infrastructure.agenda.vote.models.CreateAgendaVoteRequest;
+import br.com.dbccompany.assembleia.infrastructure.agenda.votesession.models.CreateAgendaVoteSessionRequest;
 import br.com.dbccompany.assembleia.infrastructure.configuration.json.Json;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -149,10 +154,10 @@ class AgendaAPITest {
         final var expectedVoteSessionEnd = Instant.now().plusSeconds(30);
 
         final var anAgenda = Agenda.newAgenda(
-                expectedName,
-                expectedDescription,
-                expectedIsActive
-        )
+                        expectedName,
+                        expectedDescription,
+                        expectedIsActive
+                )
                 .startVoteSession(expectedVoteSessionEnd)
                 .addVote(Vote.newVote(VoteType.YES, AssociateID.from("123")));
 
@@ -279,6 +284,232 @@ class AgendaAPITest {
                         && Objects.equals(expectedDirection, query.direction())
                         && Objects.equals(expectedSort, query.sort())
                         && Objects.equals(expectedTerms, query.terms())
+        ));
+    }
+
+    @Test
+    void givenAValidCommand_whenCallsCreateAgendaVoteSession_shouldReturnVoteSessionId() throws Exception {
+        // given
+        final var aRequest = new CreateAgendaVoteSessionRequest(
+                "MINUTES",
+                10
+        );
+
+        when(createAgendaVoteSessionUseCase.execute(any()))
+                .thenReturn(CreateAgendaVoteSessionOutput.from("123"));
+
+        // when
+        final var request = MockMvcRequestBuilders.post("/agendas/123/vote-sessions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(Json.writeValueAsString(aRequest));
+
+        final var response = this.mvc.perform(request)
+                .andDo(MockMvcResultHandlers.print());
+
+        // then
+        response.andExpectAll(
+                status().isCreated(),
+                MockMvcResultMatchers.header().string("Location", "/agendas/123/vote-sessions/123"),
+                MockMvcResultMatchers.header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE),
+                jsonPath("$.id", equalTo("123"))
+        );
+
+        verify(createAgendaVoteSessionUseCase, times(1)).execute(argThat(cmd ->
+                Objects.equals("123", cmd.agendaId().getValue())
+                        && Objects.nonNull(cmd.endsAt())
+        ));
+    }
+
+    @Test
+    void givenAValidCommand_whenCallsCreateAgendaVoteSessionWithNullDuration_shouldReturnVoteSessionId() throws Exception {
+        // given
+        final var aRequest = new CreateAgendaVoteSessionRequest(
+                "",
+                null
+        );
+
+        when(createAgendaVoteSessionUseCase.execute(any()))
+                .thenReturn(CreateAgendaVoteSessionOutput.from("123"));
+
+        // when
+        final var request = MockMvcRequestBuilders.post("/agendas/123/vote-sessions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(Json.writeValueAsString(aRequest));
+
+        final var response = this.mvc.perform(request)
+                .andDo(MockMvcResultHandlers.print());
+
+        // then
+        response.andExpectAll(
+                status().isCreated(),
+                MockMvcResultMatchers.header().string("Location", "/agendas/123/vote-sessions/123"),
+                MockMvcResultMatchers.header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE),
+                jsonPath("$.id", equalTo("123"))
+        );
+
+        verify(createAgendaVoteSessionUseCase, times(1)).execute(argThat(cmd ->
+                Objects.equals("123", cmd.agendaId().getValue())
+                        && Objects.isNull(cmd.endsAt())
+        ));
+    }
+
+    @Test
+    void givenAValidCommand_whenCallsCreateAgendaVoteWithVoteYes_shouldReturnVoteId() throws Exception {
+        // given
+        final var aRequest = new CreateAgendaVoteRequest(
+                "yes",
+                "123"
+        );
+
+        when(createAgendaVoteUseCase.execute(any()))
+                .thenReturn(CreateAgendaVoteOutput.from("123"));
+
+        // when
+        final var request = MockMvcRequestBuilders.post("/agendas/123/vote-sessions/123/votes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(Json.writeValueAsString(aRequest));
+
+        final var response = this.mvc.perform(request)
+                .andDo(MockMvcResultHandlers.print());
+
+        // then
+        response.andExpectAll(
+                status().isCreated(),
+                MockMvcResultMatchers.header().string("Location", "/agendas/123/vote-sessions/123/votes/123"),
+                MockMvcResultMatchers.header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE),
+                jsonPath("$.id", equalTo("123"))
+        );
+
+        verify(createAgendaVoteUseCase, times(1)).execute(argThat(cmd ->
+                Objects.equals("123", cmd.agendaId().getValue())
+                        && Objects.equals("123", cmd.voteSessionId().getValue())
+                        && Objects.equals("123", cmd.associateId().getValue())
+                        && Objects.equals(VoteType.YES, cmd.vote())
+        ));
+    }
+
+    @Test
+    void givenAValidCommand_whenCallsCreateAgendaVoteWithVoteNo_shouldReturnVoteId() throws Exception {
+        // given
+        final var aRequest = new CreateAgendaVoteRequest(
+                "No",
+                "123"
+        );
+
+        when(createAgendaVoteUseCase.execute(any()))
+                .thenReturn(CreateAgendaVoteOutput.from("123"));
+
+        // when
+        final var request = MockMvcRequestBuilders.post("/agendas/123/vote-sessions/123/votes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(Json.writeValueAsString(aRequest));
+
+        final var response = this.mvc.perform(request)
+                .andDo(MockMvcResultHandlers.print());
+
+        // then
+        response.andExpectAll(
+                status().isCreated(),
+                MockMvcResultMatchers.header().string("Location", "/agendas/123/vote-sessions/123/votes/123"),
+                MockMvcResultMatchers.header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE),
+                jsonPath("$.id", equalTo("123"))
+        );
+
+        verify(createAgendaVoteUseCase, times(1)).execute(argThat(cmd ->
+                Objects.equals("123", cmd.agendaId().getValue())
+                        && Objects.equals("123", cmd.voteSessionId().getValue())
+                        && Objects.equals("123", cmd.associateId().getValue())
+                        && Objects.equals(VoteType.NO, cmd.vote())
+        ));
+    }
+
+    @Test
+    void givenAValidCommand_whenCallsCreateAgendaVoteWithInvalidVote_shouldReturnVoteId() throws Exception {
+        // given
+        final var invalidVote = "nao";
+        final var expectedErrorMessage = "Invalid '%s' for vote, use only YES or NO".formatted(invalidVote);
+
+        final var aRequest = new CreateAgendaVoteRequest(
+                invalidVote,
+                "123"
+        );
+
+        // when
+        final var request = MockMvcRequestBuilders.post("/agendas/123/vote-sessions/123/votes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(Json.writeValueAsString(aRequest));
+
+        final var response = this.mvc.perform(request)
+                .andDo(MockMvcResultHandlers.print());
+
+        // then
+        response.andExpectAll(
+                status().isUnprocessableEntity(),
+                MockMvcResultMatchers.header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE),
+                jsonPath("$.message", equalTo(expectedErrorMessage)),
+                jsonPath("$.errors[0].message", equalTo(expectedErrorMessage))
+        );
+
+        verify(createAgendaVoteUseCase, times(0)).execute(any());
+    }
+
+    @Test
+    void givenValidParams_whenCallsListVotes_shouldReturnVotes() throws Exception {
+        // given
+        final var votes = List.of(
+                AgendaVotesListOutput.from(Vote.newVote(VoteType.YES, AssociateID.from("123"))),
+                AgendaVotesListOutput.from(Vote.newVote(VoteType.NO, AssociateID.from("456")))
+        );
+
+        final var expectedPage = 0;
+        final var expectedPerPage = 10;
+        final var expectedSort = "createdAt";
+        final var expectedDirection = "asc";
+        final var expectedItemsCount = 2;
+        final var expectedTotal = 2;
+
+        final var expectedPagination = new Pagination<>(expectedPage, expectedPerPage, expectedTotal, votes);
+
+        Mockito.when(listAgendaVotesUseCase.execute(any()))
+                .thenReturn(expectedPagination);
+
+        // when
+        final var request = MockMvcRequestBuilders.get("/agendas/123/vote-sessions/123/votes")
+                .queryParam("page", String.valueOf(expectedPage))
+                .queryParam("perPage", String.valueOf(expectedPerPage))
+                .queryParam("sort", expectedSort)
+                .queryParam("dir", expectedDirection)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        final var response = this.mvc.perform(request)
+                .andDo(MockMvcResultHandlers.print());
+
+        // then
+        response.andExpectAll(
+                status().isOk(),
+                jsonPath("$.current_page", equalTo(expectedPage)),
+                jsonPath("$.per_page", equalTo(expectedPerPage)),
+                jsonPath("$.total", equalTo(expectedTotal)),
+                jsonPath("$.items", hasSize(expectedItemsCount)),
+
+                jsonPath("$.items[0].id", equalTo(votes.get(0).id())),
+                jsonPath("$.items[0].vote", equalTo(votes.get(0).vote())),
+                jsonPath("$.items[0].created_at", notNullValue()),
+                jsonPath("$.items[0].associate_id", equalTo(votes.get(0).associateId().getValue())),
+
+                jsonPath("$.items[1].id", equalTo(votes.get(1).id())),
+                jsonPath("$.items[1].vote", equalTo(votes.get(1).vote())),
+                jsonPath("$.items[1].created_at", notNullValue()),
+                jsonPath("$.items[1].associate_id", equalTo(votes.get(1).associateId().getValue()))
+        );
+
+        Mockito.verify(listAgendaVotesUseCase, times(1)).execute(argThat(cmd ->
+                Objects.equals(expectedPage, cmd.searchQuery().page())
+                        && Objects.equals(expectedPerPage, cmd.searchQuery().perPage())
+                        && Objects.equals(expectedDirection, cmd.searchQuery().direction())
+                        && Objects.equals(expectedSort, cmd.searchQuery().sort())
+                        && Objects.equals("123", cmd.voteSessionId().getValue())
         ));
     }
 }
