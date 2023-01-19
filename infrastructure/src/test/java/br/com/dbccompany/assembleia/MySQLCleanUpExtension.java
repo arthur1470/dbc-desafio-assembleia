@@ -16,8 +16,8 @@ public class MySQLCleanUpExtension implements BeforeEachCallback {
         final var appContext = SpringExtension.getApplicationContext(context);
 
         cleanUp(List.of(
-                appContext.getBean(AssociateRepository.class),
-                appContext.getBean(AgendaRepository.class)
+                appContext.getBean(AgendaRepository.class),
+                appContext.getBean(AssociateRepository.class)
         ));
         SpringExtension.getApplicationContext(context)
                 .getBeansOfType(CrudRepository.class)

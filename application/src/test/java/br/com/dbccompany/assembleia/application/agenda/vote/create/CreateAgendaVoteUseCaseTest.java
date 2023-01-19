@@ -5,6 +5,7 @@ import br.com.dbccompany.assembleia.domain.agenda.AgendaGateway;
 import br.com.dbccompany.assembleia.domain.agenda.AgendaID;
 import br.com.dbccompany.assembleia.domain.agenda.vote.VoteType;
 import br.com.dbccompany.assembleia.domain.agenda.votesession.VoteSessionID;
+import br.com.dbccompany.assembleia.domain.associate.Associate;
 import br.com.dbccompany.assembleia.domain.associate.AssociateGateway;
 import br.com.dbccompany.assembleia.domain.associate.AssociateID;
 import br.com.dbccompany.assembleia.domain.exceptions.DomainException;
@@ -46,6 +47,8 @@ class CreateAgendaVoteUseCaseTest {
     @Test
     void givenAValidCommandWithVoteYes_whenCallsCreateAgendaVote_shouldReturnVoteId() {
         // given
+        final var anAssociate = Associate.newAssociate("Joao", "12345678901", true);
+
         final var anAgenda = Agenda.newAgenda("Pauta Importante", null, true)
                 .startVoteSession(InstantUtils.now().plusSeconds(30));
 
@@ -62,8 +65,8 @@ class CreateAgendaVoteUseCaseTest {
                 VoteType.YES
         );
 
-        when(associateGateway.existsById(anAssociateId))
-                .thenReturn(true);
+        when(associateGateway.findById(anAssociateId))
+                .thenReturn(Optional.of(anAssociate));
 
         when(agendaGateway.existsByAssociateAndVoteSession(anAssociateId, aVoteSessionId))
                 .thenReturn(false);
@@ -101,6 +104,7 @@ class CreateAgendaVoteUseCaseTest {
     @Test
     void givenAValidCommandWithVoteNo_whenCallsCreateAgendaVote_shouldReturnVoteId() {
         // given
+        final var anAssociate = Associate.newAssociate("Joao", "12345678901", true);
         final var anAgenda = Agenda.newAgenda("Pauta Importante", null, true)
                 .startVoteSession(InstantUtils.now().plusSeconds(30));
 
@@ -117,8 +121,8 @@ class CreateAgendaVoteUseCaseTest {
                 VoteType.NO
         );
 
-        when(associateGateway.existsById(anAssociateId))
-                .thenReturn(true);
+        when(associateGateway.findById(anAssociateId))
+                .thenReturn(Optional.of(anAssociate));
 
         when(agendaGateway.existsByAssociateAndVoteSession(anAssociateId, aVoteSessionId))
                 .thenReturn(false);
@@ -172,8 +176,8 @@ class CreateAgendaVoteUseCaseTest {
                 VoteType.YES
         );
 
-        when(associateGateway.existsById(anAssociateId))
-                .thenReturn(false);
+        when(associateGateway.findById(anAssociateId))
+                .thenReturn(Optional.empty());
 
         // when
         final var actualOutput = assertThrows(
@@ -191,6 +195,7 @@ class CreateAgendaVoteUseCaseTest {
     @Test
     void givenAValidCommandWithAssociateAlreadyVoted_whenCallsCreateAgendaVote_shouldReturnVoteId() {
         // given
+        final var anAssociate = Associate.newAssociate("Joao", "12345678901", true);
         final var anAgenda = Agenda.newAgenda("Pauta Importante", null, true)
                 .startVoteSession(InstantUtils.now().plusSeconds(30));
 
@@ -207,8 +212,8 @@ class CreateAgendaVoteUseCaseTest {
                 VoteType.NO
         );
 
-        when(associateGateway.existsById(anAssociateId))
-                .thenReturn(true);
+        when(associateGateway.findById(anAssociateId))
+                .thenReturn(Optional.of(anAssociate));
 
         when(agendaGateway.existsByAssociateAndVoteSession(anAssociateId, aVoteSessionId))
                 .thenReturn(true);
@@ -229,6 +234,7 @@ class CreateAgendaVoteUseCaseTest {
     @Test
     void givenAnAgendaIdNotStored_whenCallsCreateAgendaVote_shouldThrowNotFoundException() {
         // given
+        final var anAssociate = Associate.newAssociate("Joao", "12345678901", true);
         final var anAgendaId = AgendaID.from("123");
         final var aVoteSessionId = VoteSessionID.from("123");
         final var anAssociateId = AssociateID.from("123");
@@ -242,8 +248,8 @@ class CreateAgendaVoteUseCaseTest {
                 VoteType.YES
         );
 
-        when(associateGateway.existsById(anAssociateId))
-                .thenReturn(true);
+        when(associateGateway.findById(anAssociateId))
+                .thenReturn(Optional.of(anAssociate));
 
         when(agendaGateway.existsByAssociateAndVoteSession(anAssociateId, aVoteSessionId))
                 .thenReturn(false);
