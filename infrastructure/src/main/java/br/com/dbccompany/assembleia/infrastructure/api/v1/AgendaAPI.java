@@ -1,15 +1,15 @@
-package br.com.dbccompany.assembleia.infrastructure.api;
+package br.com.dbccompany.assembleia.infrastructure.api.v1;
 
 import br.com.dbccompany.assembleia.domain.pagination.Pagination;
-import br.com.dbccompany.assembleia.infrastructure.agenda.models.AgendaListResponse;
-import br.com.dbccompany.assembleia.infrastructure.agenda.models.AgendaResponse;
-import br.com.dbccompany.assembleia.infrastructure.agenda.models.CreateAgendaRequest;
-import br.com.dbccompany.assembleia.infrastructure.agenda.models.CreateAgendaResponse;
 import br.com.dbccompany.assembleia.infrastructure.agenda.vote.models.AgendaVotesListResponse;
 import br.com.dbccompany.assembleia.infrastructure.agenda.vote.models.CreateAgendaVoteRequest;
 import br.com.dbccompany.assembleia.infrastructure.agenda.vote.models.CreateAgendaVoteResponse;
 import br.com.dbccompany.assembleia.infrastructure.agenda.votesession.models.CreateAgendaVoteSessionRequest;
 import br.com.dbccompany.assembleia.infrastructure.agenda.votesession.models.CreateAgendaVoteSessionResponse;
+import br.com.dbccompany.assembleia.infrastructure.api.v1.models.agenda.AgendaListResponse;
+import br.com.dbccompany.assembleia.infrastructure.api.v1.models.agenda.AgendaResponse;
+import br.com.dbccompany.assembleia.infrastructure.api.v1.models.agenda.CreateAgendaRequest;
+import br.com.dbccompany.assembleia.infrastructure.api.v1.models.agenda.CreateAgendaResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -19,7 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Agendas")
-@RequestMapping("/agendas")
+@RequestMapping("/v1/agendas")
 public interface AgendaAPI {
 
     @PostMapping(
@@ -50,7 +50,7 @@ public interface AgendaAPI {
     );
 
     @GetMapping(
-            value = "/{id}",
+            value = "/{agendaId}",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     @Operation(summary = "Get an agenda by it's identifier")
@@ -59,7 +59,7 @@ public interface AgendaAPI {
             @ApiResponse(responseCode = "404", description = "Agenda was not found"),
             @ApiResponse(responseCode = "500", description = "An internal server error was thrown")
     })
-    AgendaResponse getById(@PathVariable("id") final String id);
+    AgendaResponse getById(@PathVariable("agendaId") final String id);
 
     @PostMapping(
             value = "/{agendaId}/vote-sessions",

@@ -1,9 +1,9 @@
-package br.com.dbccompany.assembleia.infrastructure.api;
+package br.com.dbccompany.assembleia.infrastructure.api.v1;
 
 import br.com.dbccompany.assembleia.domain.pagination.Pagination;
-import br.com.dbccompany.assembleia.infrastructure.associate.models.AssociateListResponse;
-import br.com.dbccompany.assembleia.infrastructure.associate.models.CreateAssociateRequest;
-import br.com.dbccompany.assembleia.infrastructure.associate.models.CreateAssociateResponse;
+import br.com.dbccompany.assembleia.infrastructure.api.v1.models.associate.AssociateListResponse;
+import br.com.dbccompany.assembleia.infrastructure.api.v1.models.associate.CreateAssociateRequest;
+import br.com.dbccompany.assembleia.infrastructure.api.v1.models.associate.CreateAssociateResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Associates")
-@RequestMapping("/associates")
+@RequestMapping("/v1/associates")
 public interface AssociateAPI {
 
     @PostMapping(

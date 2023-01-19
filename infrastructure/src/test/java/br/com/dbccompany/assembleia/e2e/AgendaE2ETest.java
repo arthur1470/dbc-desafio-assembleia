@@ -6,12 +6,12 @@ import br.com.dbccompany.assembleia.domain.agenda.AgendaID;
 import br.com.dbccompany.assembleia.domain.agenda.vote.Vote;
 import br.com.dbccompany.assembleia.domain.associate.Associate;
 import br.com.dbccompany.assembleia.domain.utils.InstantUtils;
-import br.com.dbccompany.assembleia.infrastructure.agenda.models.AgendaResponse;
-import br.com.dbccompany.assembleia.infrastructure.agenda.models.CreateAgendaRequest;
 import br.com.dbccompany.assembleia.infrastructure.agenda.persistence.AgendaJpaEntity;
 import br.com.dbccompany.assembleia.infrastructure.agenda.persistence.AgendaRepository;
 import br.com.dbccompany.assembleia.infrastructure.agenda.vote.models.CreateAgendaVoteRequest;
 import br.com.dbccompany.assembleia.infrastructure.agenda.votesession.models.CreateAgendaVoteSessionRequest;
+import br.com.dbccompany.assembleia.infrastructure.api.v1.models.agenda.AgendaResponse;
+import br.com.dbccompany.assembleia.infrastructure.api.v1.models.agenda.CreateAgendaRequest;
 import br.com.dbccompany.assembleia.infrastructure.associate.persistence.AssociateJpaEntity;
 import br.com.dbccompany.assembleia.infrastructure.associate.persistence.AssociateRepository;
 import br.com.dbccompany.assembleia.infrastructure.configuration.json.Json;
@@ -102,7 +102,7 @@ class AgendaE2ETest {
                 expectedIsActive
         );
 
-        final var aRequest = MockMvcRequestBuilders.post("/agendas")
+        final var aRequest = MockMvcRequestBuilders.post("/v1/agendas")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(Json.writeValueAsString(aRequestBody));
 
@@ -146,7 +146,7 @@ class AgendaE2ETest {
 
         final var expectedErrorMessage = "Agenda with ID 123 was not found";
 
-        final var aRequest = MockMvcRequestBuilders.get("/agendas/{id}", "123")
+        final var aRequest = MockMvcRequestBuilders.get("/v1/agendas/{id}", "123")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON);
 
@@ -258,7 +258,7 @@ class AgendaE2ETest {
         );
 
         final var aRequest =
-                MockMvcRequestBuilders.post("/agendas/{id}/vote-sessions", agendaId)
+                MockMvcRequestBuilders.post("/v1/agendas/{id}/vote-sessions", agendaId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(Json.writeValueAsString(aRequestBody));
 
@@ -294,7 +294,7 @@ class AgendaE2ETest {
         );
 
         final var aRequest =
-                MockMvcRequestBuilders.post("/agendas/{id}/vote-sessions", agendaId)
+                MockMvcRequestBuilders.post("/v1/agendas/{id}/vote-sessions", agendaId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(Json.writeValueAsString(aRequestBody));
 
@@ -336,7 +336,7 @@ class AgendaE2ETest {
         );
 
         final var aVoteSessionRequest =
-                MockMvcRequestBuilders.post("/agendas/{id}/vote-sessions", agendaId)
+                MockMvcRequestBuilders.post("/v1/agendas/{id}/vote-sessions", agendaId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(Json.writeValueAsString(aSessionRequestBody));
 
@@ -347,7 +347,7 @@ class AgendaE2ETest {
                 .getResponse()
                 .getHeader("location")
                 .replace(
-                        "/agendas/" + agendaId + "/vote-sessions/",
+                        "/v1/agendas/" + agendaId + "/vote-sessions/",
                         ""
                 );
 
@@ -357,7 +357,7 @@ class AgendaE2ETest {
         );
 
         final var aVoteRequest =
-                MockMvcRequestBuilders.post("/agendas/{agendaId}/vote-sessions/{sessionId}/votes", agendaId, sessionId)
+                MockMvcRequestBuilders.post("/v1/agendas/{agendaId}/vote-sessions/{sessionId}/votes", agendaId, sessionId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(Json.writeValueAsString(aVoteRequestBody));
 
@@ -402,7 +402,7 @@ class AgendaE2ETest {
         );
 
         final var aVoteSessionRequest =
-                MockMvcRequestBuilders.post("/agendas/{id}/vote-sessions", agendaId)
+                MockMvcRequestBuilders.post("/v1/agendas/{id}/vote-sessions", agendaId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(Json.writeValueAsString(aSessionRequestBody));
 
@@ -413,7 +413,7 @@ class AgendaE2ETest {
                 .getResponse()
                 .getHeader("location")
                 .replace(
-                        "/agendas/" + agendaId + "/vote-sessions/",
+                        "/v1/agendas/" + agendaId + "/vote-sessions/",
                         ""
                 );
 
@@ -423,7 +423,7 @@ class AgendaE2ETest {
         );
 
         final var aVoteRequest =
-                MockMvcRequestBuilders.post("/agendas/{agendaId}/vote-sessions/{sessionId}/votes", agendaId, sessionId)
+                MockMvcRequestBuilders.post("/v1/agendas/{agendaId}/vote-sessions/{sessionId}/votes", agendaId, sessionId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(Json.writeValueAsString(aVoteRequestBody));
 
@@ -464,7 +464,7 @@ class AgendaE2ETest {
         );
 
         final var aVoteSessionRequest =
-                MockMvcRequestBuilders.post("/agendas/{id}/vote-sessions", agendaId)
+                MockMvcRequestBuilders.post("/v1/agendas/{id}/vote-sessions", agendaId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(Json.writeValueAsString(aSessionRequestBody));
 
@@ -475,7 +475,7 @@ class AgendaE2ETest {
                 .getResponse()
                 .getHeader("location")
                 .replace(
-                        "/agendas/" + agendaId + "/vote-sessions/",
+                        "/v1/agendas/" + agendaId + "/vote-sessions/",
                         ""
                 );
 
@@ -485,7 +485,7 @@ class AgendaE2ETest {
         );
 
         final var aVoteRequest =
-                MockMvcRequestBuilders.post("/agendas/{agendaId}/vote-sessions/{sessionId}/votes", agendaId, sessionId)
+                MockMvcRequestBuilders.post("/v1/agendas/{agendaId}/vote-sessions/{sessionId}/votes", agendaId, sessionId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(Json.writeValueAsString(aVoteRequestBody));
 
@@ -525,7 +525,7 @@ class AgendaE2ETest {
         );
 
         final var aVoteSessionRequest =
-                MockMvcRequestBuilders.post("/agendas/{id}/vote-sessions", agendaId)
+                MockMvcRequestBuilders.post("/v1/agendas/{id}/vote-sessions", agendaId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(Json.writeValueAsString(aSessionRequestBody));
 
@@ -536,7 +536,7 @@ class AgendaE2ETest {
                 .getResponse()
                 .getHeader("location")
                 .replace(
-                        "/agendas/" + agendaId + "/vote-sessions/",
+                        "/v1/agendas/" + agendaId + "/vote-sessions/",
                         ""
                 );
 
@@ -546,7 +546,7 @@ class AgendaE2ETest {
         );
 
         final var aVoteRequest =
-                MockMvcRequestBuilders.post("/agendas/{agendaId}/vote-sessions/{sessionId}/votes", agendaId, sessionId)
+                MockMvcRequestBuilders.post("/v1/agendas/{agendaId}/vote-sessions/{sessionId}/votes", agendaId, sessionId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(Json.writeValueAsString(aVoteRequestBody));
 
@@ -579,7 +579,7 @@ class AgendaE2ETest {
         );
 
         final var aVoteRequest = MockMvcRequestBuilders.post(
-                        "/agendas/{agendaId}/vote-sessions/{sessionId}/votes",
+                        "/v1/agendas/{agendaId}/vote-sessions/{sessionId}/votes",
                         anAgenda.getId().getValue(),
                         anAgenda.getVoteSession().getId().getValue()
                 )
@@ -626,7 +626,7 @@ class AgendaE2ETest {
         final var expectedDirection = "asc";
 
         final var aListVotesRequest =
-                MockMvcRequestBuilders.get("/agendas/{agendaId}/vote-sessions/{sessionId}/votes", agendaId, sessionId)
+                MockMvcRequestBuilders.get("/v1/agendas/{agendaId}/vote-sessions/{sessionId}/votes", agendaId, sessionId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .queryParam("page", String.valueOf(expectedPage))
                         .queryParam("perPage", String.valueOf(expectedPerPage))
@@ -654,7 +654,7 @@ class AgendaE2ETest {
                 isActive
         );
 
-        final var aRequest = MockMvcRequestBuilders.post("/agendas")
+        final var aRequest = MockMvcRequestBuilders.post("/v1/agendas")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(Json.writeValueAsString(aRequestBody));
 
@@ -669,7 +669,7 @@ class AgendaE2ETest {
     }
 
     private AgendaResponse retrieveAnAgenda(final String anId) throws Exception {
-        final var aRequest = MockMvcRequestBuilders.get("/agendas/{id}", anId)
+        final var aRequest = MockMvcRequestBuilders.get("/v1/agendas/{id}", anId)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON);
 
@@ -708,7 +708,7 @@ class AgendaE2ETest {
             final String sort,
             final String direction
     ) throws Exception {
-        final var aRequest = MockMvcRequestBuilders.get("/agendas")
+        final var aRequest = MockMvcRequestBuilders.get("/v1/agendas")
                 .queryParam("page", String.valueOf(page))
                 .queryParam("perPage", String.valueOf(perPage))
                 .queryParam("search", search)

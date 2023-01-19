@@ -2,7 +2,7 @@ package br.com.dbccompany.assembleia.e2e;
 
 import br.com.dbccompany.assembleia.E2ETest;
 import br.com.dbccompany.assembleia.domain.associate.AssociateID;
-import br.com.dbccompany.assembleia.infrastructure.associate.models.CreateAssociateRequest;
+import br.com.dbccompany.assembleia.infrastructure.api.v1.models.associate.CreateAssociateRequest;
 import br.com.dbccompany.assembleia.infrastructure.associate.persistence.AssociateRepository;
 import br.com.dbccompany.assembleia.infrastructure.configuration.json.Json;
 import org.junit.jupiter.api.Assertions;
@@ -111,7 +111,7 @@ class AssociateE2ETest {
                 expectedIsActive
         );
 
-        final var aRequest = MockMvcRequestBuilders.post("/associates")
+        final var aRequest = MockMvcRequestBuilders.post("/v1/associates")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(Json.writeValueAsString(aRequestBody));
 
@@ -143,7 +143,7 @@ class AssociateE2ETest {
                 expectedIsActive
         );
 
-        final var aRequest = MockMvcRequestBuilders.post("/associates")
+        final var aRequest = MockMvcRequestBuilders.post("/v1/associates")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(Json.writeValueAsString(aRequestBody));
 
@@ -256,7 +256,7 @@ class AssociateE2ETest {
                 isActive
         );
 
-        final var aRequest = MockMvcRequestBuilders.post("/associates")
+        final var aRequest = MockMvcRequestBuilders.post("/v1/associates")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(Json.writeValueAsString(aRequestBody));
 
@@ -297,7 +297,7 @@ class AssociateE2ETest {
             final String sort,
             final String direction
     ) throws Exception {
-        final var aRequest = MockMvcRequestBuilders.get("/associates")
+        final var aRequest = MockMvcRequestBuilders.get("/v1/associates")
                 .queryParam("page", String.valueOf(page))
                 .queryParam("perPage", String.valueOf(perPage))
                 .queryParam("search", search)

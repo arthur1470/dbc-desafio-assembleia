@@ -1,4 +1,4 @@
-package br.com.dbccompany.assembleia.infrastructure.api.controllers;
+package br.com.dbccompany.assembleia.infrastructure.api.v1.controllers;
 
 import br.com.dbccompany.assembleia.application.agenda.create.CreateAgendaCommand;
 import br.com.dbccompany.assembleia.application.agenda.create.CreateAgendaUseCase;
@@ -18,10 +18,6 @@ import br.com.dbccompany.assembleia.domain.agenda.votesession.VoteSessionID;
 import br.com.dbccompany.assembleia.domain.associate.AssociateID;
 import br.com.dbccompany.assembleia.domain.exceptions.DomainException;
 import br.com.dbccompany.assembleia.domain.pagination.Pagination;
-import br.com.dbccompany.assembleia.infrastructure.agenda.models.AgendaListResponse;
-import br.com.dbccompany.assembleia.infrastructure.agenda.models.AgendaResponse;
-import br.com.dbccompany.assembleia.infrastructure.agenda.models.CreateAgendaRequest;
-import br.com.dbccompany.assembleia.infrastructure.agenda.models.CreateAgendaResponse;
 import br.com.dbccompany.assembleia.infrastructure.agenda.presenters.AgendaApiPresenter;
 import br.com.dbccompany.assembleia.infrastructure.agenda.vote.models.AgendaVotesListResponse;
 import br.com.dbccompany.assembleia.infrastructure.agenda.vote.models.CreateAgendaVoteRequest;
@@ -31,7 +27,11 @@ import br.com.dbccompany.assembleia.infrastructure.agenda.votesession.models.Cre
 import br.com.dbccompany.assembleia.infrastructure.agenda.votesession.models.CreateAgendaVoteSessionResponse;
 import br.com.dbccompany.assembleia.infrastructure.agenda.votesession.models.VoteSessionDuration;
 import br.com.dbccompany.assembleia.infrastructure.agenda.votesession.presenters.VoteSessionApiPresenter;
-import br.com.dbccompany.assembleia.infrastructure.api.AgendaAPI;
+import br.com.dbccompany.assembleia.infrastructure.api.v1.AgendaAPI;
+import br.com.dbccompany.assembleia.infrastructure.api.v1.models.agenda.AgendaListResponse;
+import br.com.dbccompany.assembleia.infrastructure.api.v1.models.agenda.AgendaResponse;
+import br.com.dbccompany.assembleia.infrastructure.api.v1.models.agenda.CreateAgendaRequest;
+import br.com.dbccompany.assembleia.infrastructure.api.v1.models.agenda.CreateAgendaResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -76,7 +76,7 @@ public class AgendaController implements AgendaAPI {
         final var response = AgendaApiPresenter.present(createAgendaUseCase.execute(aCommand));
 
         return ResponseEntity
-                .created(URI.create("/agendas/%s".formatted(response.id())))
+                .created(URI.create("/v1/agendas/%s".formatted(response.id())))
                 .body(response);
     }
 
@@ -123,7 +123,7 @@ public class AgendaController implements AgendaAPI {
         final var response = createAgendaVoteSessionUseCase.execute(aCommand);
 
         return ResponseEntity
-                .created(URI.create("/agendas/%s/vote-sessions/%s".formatted(agendaId, response.id())))
+                .created(URI.create("/v1/agendas/%s/vote-sessions/%s".formatted(agendaId, response.id())))
                 .body(VoteSessionApiPresenter.present(response));
     }
 
@@ -149,7 +149,7 @@ public class AgendaController implements AgendaAPI {
         final var response = createAgendaVoteUseCase.execute(aCommand);
 
         final var uri = URI.create(
-                "/agendas/%s/vote-sessions/%s/votes/%s".formatted(agendaId, voteSessionId, response.id())
+                "/v1/agendas/%s/vote-sessions/%s/votes/%s".formatted(agendaId, voteSessionId, response.id())
         );
 
         return ResponseEntity

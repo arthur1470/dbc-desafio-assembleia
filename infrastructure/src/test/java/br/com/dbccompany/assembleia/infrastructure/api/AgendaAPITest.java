@@ -22,9 +22,10 @@ import br.com.dbccompany.assembleia.domain.exceptions.DomainException;
 import br.com.dbccompany.assembleia.domain.exceptions.NotFoundException;
 import br.com.dbccompany.assembleia.domain.pagination.Pagination;
 import br.com.dbccompany.assembleia.domain.validation.Error;
-import br.com.dbccompany.assembleia.infrastructure.agenda.models.CreateAgendaRequest;
 import br.com.dbccompany.assembleia.infrastructure.agenda.vote.models.CreateAgendaVoteRequest;
 import br.com.dbccompany.assembleia.infrastructure.agenda.votesession.models.CreateAgendaVoteSessionRequest;
+import br.com.dbccompany.assembleia.infrastructure.api.v1.AgendaAPI;
+import br.com.dbccompany.assembleia.infrastructure.api.v1.models.agenda.CreateAgendaRequest;
 import br.com.dbccompany.assembleia.infrastructure.configuration.json.Json;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -82,7 +83,7 @@ class AgendaAPITest {
                 .thenReturn(CreateAgendaOutput.from("123"));
 
         // when
-        final var request = MockMvcRequestBuilders.post("/agendas")
+        final var request = MockMvcRequestBuilders.post("/v1/agendas")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(Json.writeValueAsString(aRequest));
 
@@ -92,7 +93,7 @@ class AgendaAPITest {
         // then
         response.andExpectAll(
                 status().isCreated(),
-                MockMvcResultMatchers.header().string("Location", "/agendas/123"),
+                MockMvcResultMatchers.header().string("Location", "/v1/agendas/123"),
                 MockMvcResultMatchers.header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE),
                 jsonPath("$.id", equalTo("123"))
         );
@@ -122,7 +123,7 @@ class AgendaAPITest {
                 .thenThrow(DomainException.with(new Error(expectedErrorMessage)));
 
         // when
-        final var request = MockMvcRequestBuilders.post("/agendas")
+        final var request = MockMvcRequestBuilders.post("/v1/agendas")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(Json.writeValueAsString(aRequest));
 
@@ -167,7 +168,7 @@ class AgendaAPITest {
                 .thenReturn(AgendaOutput.from(anAgenda));
 
         // when
-        final var request = MockMvcRequestBuilders.get("/agendas/{id}", expectedId)
+        final var request = MockMvcRequestBuilders.get("/v1/agendas/{id}", expectedId)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON);
 
@@ -208,7 +209,7 @@ class AgendaAPITest {
                 .thenThrow(NotFoundException.with(Agenda.class, expectedId));
 
         // when
-        final var request = MockMvcRequestBuilders.get("/agendas/{id}", expectedId.getValue())
+        final var request = MockMvcRequestBuilders.get("/v1/agendas/{id}", expectedId.getValue())
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON);
 
@@ -244,7 +245,7 @@ class AgendaAPITest {
                 .thenReturn(expectedPagination);
 
         // when
-        final var request = MockMvcRequestBuilders.get("/agendas")
+        final var request = MockMvcRequestBuilders.get("/v1/agendas")
                 .queryParam("page", String.valueOf(expectedPage))
                 .queryParam("perPage", String.valueOf(expectedPerPage))
                 .queryParam("sort", expectedSort)
@@ -300,7 +301,7 @@ class AgendaAPITest {
                 .thenReturn(CreateAgendaVoteSessionOutput.from("123"));
 
         // when
-        final var request = MockMvcRequestBuilders.post("/agendas/123/vote-sessions")
+        final var request = MockMvcRequestBuilders.post("/v1/agendas/123/vote-sessions")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(Json.writeValueAsString(aRequest));
 
@@ -310,7 +311,7 @@ class AgendaAPITest {
         // then
         response.andExpectAll(
                 status().isCreated(),
-                MockMvcResultMatchers.header().string("Location", "/agendas/123/vote-sessions/123"),
+                MockMvcResultMatchers.header().string("Location", "/v1/agendas/123/vote-sessions/123"),
                 MockMvcResultMatchers.header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE),
                 jsonPath("$.id", equalTo("123"))
         );
@@ -333,7 +334,7 @@ class AgendaAPITest {
                 .thenReturn(CreateAgendaVoteSessionOutput.from("123"));
 
         // when
-        final var request = MockMvcRequestBuilders.post("/agendas/123/vote-sessions")
+        final var request = MockMvcRequestBuilders.post("/v1/agendas/123/vote-sessions")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(Json.writeValueAsString(aRequest));
 
@@ -343,7 +344,7 @@ class AgendaAPITest {
         // then
         response.andExpectAll(
                 status().isCreated(),
-                MockMvcResultMatchers.header().string("Location", "/agendas/123/vote-sessions/123"),
+                MockMvcResultMatchers.header().string("Location", "/v1/agendas/123/vote-sessions/123"),
                 MockMvcResultMatchers.header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE),
                 jsonPath("$.id", equalTo("123"))
         );
@@ -366,7 +367,7 @@ class AgendaAPITest {
                 .thenReturn(CreateAgendaVoteOutput.from("123"));
 
         // when
-        final var request = MockMvcRequestBuilders.post("/agendas/123/vote-sessions/123/votes")
+        final var request = MockMvcRequestBuilders.post("/v1/agendas/123/vote-sessions/123/votes")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(Json.writeValueAsString(aRequest));
 
@@ -376,7 +377,7 @@ class AgendaAPITest {
         // then
         response.andExpectAll(
                 status().isCreated(),
-                MockMvcResultMatchers.header().string("Location", "/agendas/123/vote-sessions/123/votes/123"),
+                MockMvcResultMatchers.header().string("Location", "/v1/agendas/123/vote-sessions/123/votes/123"),
                 MockMvcResultMatchers.header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE),
                 jsonPath("$.id", equalTo("123"))
         );
@@ -401,7 +402,7 @@ class AgendaAPITest {
                 .thenReturn(CreateAgendaVoteOutput.from("123"));
 
         // when
-        final var request = MockMvcRequestBuilders.post("/agendas/123/vote-sessions/123/votes")
+        final var request = MockMvcRequestBuilders.post("/v1/agendas/123/vote-sessions/123/votes")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(Json.writeValueAsString(aRequest));
 
@@ -411,7 +412,7 @@ class AgendaAPITest {
         // then
         response.andExpectAll(
                 status().isCreated(),
-                MockMvcResultMatchers.header().string("Location", "/agendas/123/vote-sessions/123/votes/123"),
+                MockMvcResultMatchers.header().string("Location", "/v1/agendas/123/vote-sessions/123/votes/123"),
                 MockMvcResultMatchers.header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE),
                 jsonPath("$.id", equalTo("123"))
         );
@@ -436,7 +437,7 @@ class AgendaAPITest {
         );
 
         // when
-        final var request = MockMvcRequestBuilders.post("/agendas/123/vote-sessions/123/votes")
+        final var request = MockMvcRequestBuilders.post("/v1/agendas/123/vote-sessions/123/votes")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(Json.writeValueAsString(aRequest));
 
@@ -475,7 +476,7 @@ class AgendaAPITest {
                 .thenReturn(expectedPagination);
 
         // when
-        final var request = MockMvcRequestBuilders.get("/agendas/123/vote-sessions/123/votes")
+        final var request = MockMvcRequestBuilders.get("/v1/agendas/123/vote-sessions/123/votes")
                 .queryParam("page", String.valueOf(expectedPage))
                 .queryParam("perPage", String.valueOf(expectedPerPage))
                 .queryParam("sort", expectedSort)

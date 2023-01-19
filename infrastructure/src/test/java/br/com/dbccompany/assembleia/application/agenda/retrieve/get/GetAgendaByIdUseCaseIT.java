@@ -1,11 +1,9 @@
 package br.com.dbccompany.assembleia.application.agenda.retrieve.get;
 
 import br.com.dbccompany.assembleia.IntegrationTest;
-import br.com.dbccompany.assembleia.application.agenda.create.CreateAgendaCommand;
 import br.com.dbccompany.assembleia.domain.agenda.Agenda;
 import br.com.dbccompany.assembleia.domain.agenda.AgendaGateway;
 import br.com.dbccompany.assembleia.domain.agenda.AgendaID;
-import br.com.dbccompany.assembleia.domain.exceptions.DomainException;
 import br.com.dbccompany.assembleia.domain.exceptions.NotFoundException;
 import br.com.dbccompany.assembleia.infrastructure.agenda.persistence.AgendaJpaEntity;
 import br.com.dbccompany.assembleia.infrastructure.agenda.persistence.AgendaRepository;

@@ -1,4 +1,4 @@
-package br.com.dbccompany.assembleia.infrastructure.api.handler;
+package br.com.dbccompany.assembleia.infrastructure.api.v1.handler;
 
 import br.com.dbccompany.assembleia.domain.exceptions.DomainException;
 import br.com.dbccompany.assembleia.domain.exceptions.NotFoundException;

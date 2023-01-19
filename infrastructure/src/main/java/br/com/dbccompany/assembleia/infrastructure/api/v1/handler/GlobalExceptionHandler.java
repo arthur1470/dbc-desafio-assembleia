@@ -1,14 +1,11 @@
-package br.com.dbccompany.assembleia.infrastructure.api.handler;
+package br.com.dbccompany.assembleia.infrastructure.api.v1.handler;
 
 import br.com.dbccompany.assembleia.domain.exceptions.DomainException;
 import br.com.dbccompany.assembleia.domain.exceptions.NotFoundException;
-import br.com.dbccompany.assembleia.domain.validation.Error;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {

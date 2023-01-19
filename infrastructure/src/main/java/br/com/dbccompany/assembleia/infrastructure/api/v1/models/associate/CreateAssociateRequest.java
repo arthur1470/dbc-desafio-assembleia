@@ -1,4 +1,4 @@
-package br.com.dbccompany.assembleia.infrastructure.associate.models;
+package br.com.dbccompany.assembleia.infrastructure.api.v1.models.associate;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

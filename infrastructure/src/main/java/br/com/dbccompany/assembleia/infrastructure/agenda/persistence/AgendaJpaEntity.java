@@ -2,7 +2,6 @@ package br.com.dbccompany.assembleia.infrastructure.agenda.persistence;
 
 import br.com.dbccompany.assembleia.domain.agenda.Agenda;
 import br.com.dbccompany.assembleia.domain.agenda.AgendaID;
-import br.com.dbccompany.assembleia.domain.agenda.votesession.VoteSession;
 import br.com.dbccompany.assembleia.infrastructure.agenda.votesession.persistence.VoteSessionJpaEntity;
 
 import javax.persistence.*;

@@ -9,7 +9,8 @@ import br.com.dbccompany.assembleia.domain.associate.Associate;
 import br.com.dbccompany.assembleia.domain.exceptions.DomainException;
 import br.com.dbccompany.assembleia.domain.pagination.Pagination;
 import br.com.dbccompany.assembleia.domain.validation.Error;
-import br.com.dbccompany.assembleia.infrastructure.associate.models.CreateAssociateRequest;
+import br.com.dbccompany.assembleia.infrastructure.api.v1.AssociateAPI;
+import br.com.dbccompany.assembleia.infrastructure.api.v1.models.associate.CreateAssociateRequest;
 import br.com.dbccompany.assembleia.infrastructure.configuration.json.Json;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -58,7 +59,7 @@ class AssociateAPITest {
                 .thenReturn(CreateAssociateOutput.from("123"));
 
         // when
-        final var request = MockMvcRequestBuilders.post("/associates")
+        final var request = MockMvcRequestBuilders.post("/v1/associates")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(Json.writeValueAsString(aRequest));
 
@@ -68,7 +69,7 @@ class AssociateAPITest {
         // then
         response.andExpectAll(
                 status().isCreated(),
-                MockMvcResultMatchers.header().string("Location", "/associates/123"),
+                MockMvcResultMatchers.header().string("Location", "/v1/associates/123"),
                 MockMvcResultMatchers.header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE),
                 jsonPath("$.id", equalTo("123"))
         );
@@ -98,7 +99,7 @@ class AssociateAPITest {
                 .thenThrow(DomainException.with(new Error(expectedErrorMessage)));
 
         // when
-        final var request = MockMvcRequestBuilders.post("/associates")
+        final var request = MockMvcRequestBuilders.post("/v1/associates")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(Json.writeValueAsString(aRequest));
 
@@ -143,7 +144,7 @@ class AssociateAPITest {
                 .thenReturn(expectedPagination);
 
         // when
-        final var request = MockMvcRequestBuilders.get("/associates")
+        final var request = MockMvcRequestBuilders.get("/v1/associates")
                 .queryParam("page", String.valueOf(expectedPage))
                 .queryParam("perPage", String.valueOf(expectedPerPage))
                 .queryParam("sort", expectedSort)

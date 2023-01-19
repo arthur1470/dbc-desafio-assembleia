@@ -1,4 +1,4 @@
-package br.com.dbccompany.assembleia.infrastructure.agenda.models;
+package br.com.dbccompany.assembleia.infrastructure.api.v1.models.agenda;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
