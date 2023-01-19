@@ -9,10 +9,12 @@ import br.com.dbccompany.assembleia.domain.utils.InstantUtils;
 import br.com.dbccompany.assembleia.infrastructure.agenda.persistence.AgendaJpaEntity;
 import br.com.dbccompany.assembleia.infrastructure.agenda.persistence.AgendaRepository;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 
 @IntegrationTest
 class CreateAgendaVoteSessionUseCaseIT {
@@ -80,5 +82,6 @@ class CreateAgendaVoteSessionUseCaseIT {
 
         assertNotNull(actualException);
         assertEquals(expectedErrorMessage, actualException.getErrors().get(0).message());
+        Mockito.verify(agendaGateway, Mockito.times(0)).create(any());
     }
 }
