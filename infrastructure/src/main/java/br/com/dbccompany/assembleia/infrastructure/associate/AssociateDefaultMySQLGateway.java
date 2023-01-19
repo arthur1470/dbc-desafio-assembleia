@@ -3,12 +3,20 @@ package br.com.dbccompany.assembleia.infrastructure.associate;
 import br.com.dbccompany.assembleia.domain.associate.Associate;
 import br.com.dbccompany.assembleia.domain.associate.AssociateGateway;
 import br.com.dbccompany.assembleia.domain.associate.AssociateID;
+import br.com.dbccompany.assembleia.domain.associate.AssociateSearchQuery;
+import br.com.dbccompany.assembleia.domain.pagination.Pagination;
 import br.com.dbccompany.assembleia.infrastructure.associate.persistence.AssociateJpaEntity;
 import br.com.dbccompany.assembleia.infrastructure.associate.persistence.AssociateRepository;
+import br.com.dbccompany.assembleia.infrastructure.utils.SpecificationUtils;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 import java.util.Optional;
+
+import static br.com.dbccompany.assembleia.infrastructure.utils.SpecificationUtils.like;
 
 @Component
 public class AssociateDefaultMySQLGateway implements AssociateGateway {
@@ -45,5 +53,32 @@ public class AssociateDefaultMySQLGateway implements AssociateGateway {
     @Override
     public boolean isDocumentValid(final String document) {
         return true;
+    }
+
+    @Override
+    public Pagination<Associate> findAll(final AssociateSearchQuery aQuery) {
+        final var page = PageRequest.of(
+                aQuery.page(),
+                aQuery.perPage(),
+                Sort.by(Sort.Direction.fromString(aQuery.direction()), aQuery.sort())
+        );
+
+        final var specifications = Optional.ofNullable(aQuery.terms())
+                .filter(str -> !str.isBlank())
+                .map(term ->
+                        SpecificationUtils.<AssociateJpaEntity>like("name", term)
+                                .or(like("document", term))
+                )
+                .orElse(null);
+
+        final var pageResult =
+                this.associateRepository.findAll(Specification.where(specifications), page);
+
+        return new Pagination<>(
+                pageResult.getNumber(),
+                pageResult.getSize(),
+                pageResult.getTotalElements(),
+                pageResult.map(AssociateJpaEntity::toAggregate).toList()
+        );
     }
 }

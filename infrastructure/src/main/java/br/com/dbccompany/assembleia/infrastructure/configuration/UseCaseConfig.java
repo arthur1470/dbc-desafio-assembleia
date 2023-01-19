@@ -14,6 +14,8 @@ import br.com.dbccompany.assembleia.application.agenda.votesession.create.Create
 import br.com.dbccompany.assembleia.application.agenda.votesession.create.DefaultCreateAgendaVoteSessionUseCase;
 import br.com.dbccompany.assembleia.application.associate.create.CreateAssociateUseCase;
 import br.com.dbccompany.assembleia.application.associate.create.DefaultCreateAssociateUseCase;
+import br.com.dbccompany.assembleia.application.associate.retrieve.list.DefaultListAssociatesUseCase;
+import br.com.dbccompany.assembleia.application.associate.retrieve.list.ListAssociatesUseCase;
 import br.com.dbccompany.assembleia.domain.agenda.AgendaGateway;
 import br.com.dbccompany.assembleia.domain.associate.AssociateGateway;
 import org.springframework.context.annotation.Bean;
@@ -36,6 +38,11 @@ public class UseCaseConfig {
     @Bean
     public CreateAssociateUseCase createAssociateUseCase() {
         return new DefaultCreateAssociateUseCase(associateGateway);
+    }
+
+    @Bean
+    public ListAssociatesUseCase listAssociatesUseCase() {
+        return new DefaultListAssociatesUseCase(associateGateway);
     }
 
     @Bean
