@@ -22,7 +22,7 @@ public class AssociateController implements AssociateAPI {
     }
 
     @Override
-    public ResponseEntity<CreateAssociateResponse> createCategory(final CreateAssociateRequest request) {
+    public ResponseEntity<CreateAssociateResponse> createAssociate(final CreateAssociateRequest request) {
         final var isActive = request.active() == null || request.active();
 
         final var aCommand = CreateAssociateCommand.with(

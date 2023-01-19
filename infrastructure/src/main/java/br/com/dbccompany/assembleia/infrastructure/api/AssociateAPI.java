@@ -1,6 +1,5 @@
 package br.com.dbccompany.assembleia.infrastructure.api;
 
-import br.com.dbccompany.assembleia.application.associate.create.CreateAssociateCommand;
 import br.com.dbccompany.assembleia.infrastructure.associate.models.CreateAssociateRequest;
 import br.com.dbccompany.assembleia.infrastructure.associate.models.CreateAssociateResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,5 +26,5 @@ public interface AssociateAPI {
             @ApiResponse(responseCode = "422", description = "A validation error was thrown"),
             @ApiResponse(responseCode = "500", description = "An internal server error was thrown"),
     })
-    ResponseEntity<CreateAssociateResponse> createCategory(@RequestBody final CreateAssociateRequest request);
+    ResponseEntity<CreateAssociateResponse> createAssociate(@RequestBody final CreateAssociateRequest request);
 }

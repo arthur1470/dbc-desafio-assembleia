@@ -139,4 +139,12 @@ public class AgendaJpaEntity {
     public void setDeletedAt(Instant deletedAt) {
         this.deletedAt = deletedAt;
     }
+
+    public void setVoteSession(VoteSessionJpaEntity voteSession) {
+        this.voteSession = voteSession;
+    }
+
+    public VoteSessionJpaEntity getVoteSession() {
+        return voteSession;
+    }
 }
