@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -157,6 +158,93 @@ class AssociateE2ETest {
                 .andExpect(jsonPath("$.errors[1].message", equalTo(expectedErrorMessage2)));
     }
 
+    @Test
+    void ItShouldBeAbleToNavigateToAllAssociates() throws Exception {
+        Assertions.assertTrue(MYSQL_CONTAINER.isRunning());
+        assertEquals(0, associateRepository.count());
+
+        givenAnAssociate("Andre", "12345678901", true);
+        givenAnAssociate("Bruna", "12345678902", true);
+        givenAnAssociate("Camila", "12345678903", true);
+
+        assertEquals(3, associateRepository.count());
+
+        listAssociates(0, 1)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.current_page", equalTo(0)))
+                .andExpect(jsonPath("$.per_page", equalTo(1)))
+                .andExpect(jsonPath("$.total", equalTo(3)))
+                .andExpect(jsonPath("$.items", hasSize(1)))
+                .andExpect(jsonPath("$.items[0].name", equalTo("Andre")));
+
+        listAssociates(1, 1)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.current_page", equalTo(1)))
+                .andExpect(jsonPath("$.per_page", equalTo(1)))
+                .andExpect(jsonPath("$.total", equalTo(3)))
+                .andExpect(jsonPath("$.items", hasSize(1)))
+                .andExpect(jsonPath("$.items[0].name", equalTo("Bruna")));
+
+        listAssociates(2, 1)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.current_page", equalTo(2)))
+                .andExpect(jsonPath("$.per_page", equalTo(1)))
+                .andExpect(jsonPath("$.total", equalTo(3)))
+                .andExpect(jsonPath("$.items", hasSize(1)))
+                .andExpect(jsonPath("$.items[0].name", equalTo("Camila")));
+
+        listAssociates(3, 1)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.current_page", equalTo(3)))
+                .andExpect(jsonPath("$.per_page", equalTo(1)))
+                .andExpect(jsonPath("$.total", equalTo(3)))
+                .andExpect(jsonPath("$.items", hasSize(0)));
+    }
+
+    @Test
+    void ItShouldBeAbleToSearchBetweenAllAssociates() throws Exception {
+        Assertions.assertTrue(MYSQL_CONTAINER.isRunning());
+        assertEquals(0, associateRepository.count());
+
+        givenAnAssociate("Andre", "12345678901", true);
+        givenAnAssociate("Bruna", "12345678902", true);
+        givenAnAssociate("Camila", "12345678903", true);
+
+        assertEquals(3, associateRepository.count());
+
+        listAssociates(0, 1, "Una")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.current_page", equalTo(0)))
+                .andExpect(jsonPath("$.per_page", equalTo(1)))
+                .andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("$.items", hasSize(1)))
+                .andExpect(jsonPath("$.items[0].name", equalTo("Bruna")));
+
+    }
+
+    @Test
+    void ItShouldBeAbleToSortAllAssociatesByDocumentDesc() throws Exception {
+        Assertions.assertTrue(MYSQL_CONTAINER.isRunning());
+        assertEquals(0, associateRepository.count());
+
+        givenAnAssociate("Bruna", "12345678902", true);
+        givenAnAssociate("Camila", "12345678903", true);
+        givenAnAssociate("Andre", "12345678901", true);
+
+        assertEquals(3, associateRepository.count());
+
+        listAssociates(0, 3, "", "document", "desc")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.current_page", equalTo(0)))
+                .andExpect(jsonPath("$.per_page", equalTo(3)))
+                .andExpect(jsonPath("$.total", equalTo(3)))
+                .andExpect(jsonPath("$.items", hasSize(3)))
+                .andExpect(jsonPath("$.items[0].name", equalTo("Camila")))
+                .andExpect(jsonPath("$.items[1].name", equalTo("Bruna")))
+                .andExpect(jsonPath("$.items[2].name", equalTo("Andre")));
+
+    }
+
     private AssociateID givenAnAssociate(
             final String aName,
             final String aDocument,
@@ -180,5 +268,44 @@ class AssociateE2ETest {
 
         final var response = Json.readValue(actualJson, Map.class);
         return AssociateID.from((String) response.get("id"));
+    }
+
+    private ResultActions listAssociates(final int page, final int perPage, final String search) throws Exception {
+        return listAssociates(
+                page,
+                perPage,
+                search,
+                "",
+                ""
+        );
+    }
+
+    private ResultActions listAssociates(final int page, final int perPage) throws Exception {
+        return listAssociates(
+                page,
+                perPage,
+                "",
+                "",
+                ""
+        );
+    }
+
+    private ResultActions listAssociates(
+            final int page,
+            final int perPage,
+            final String search,
+            final String sort,
+            final String direction
+    ) throws Exception {
+        final var aRequest = MockMvcRequestBuilders.get("/associates")
+                .queryParam("page", String.valueOf(page))
+                .queryParam("perPage", String.valueOf(perPage))
+                .queryParam("search", search)
+                .queryParam("sort", sort)
+                .queryParam("dir", direction)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        return mvc.perform(aRequest);
     }
 }
