@@ -4,6 +4,8 @@ import br.com.dbccompany.assembleia.domain.associate.Associate;
 import br.com.dbccompany.assembleia.domain.associate.AssociateGateway;
 import br.com.dbccompany.assembleia.domain.associate.AssociateID;
 import br.com.dbccompany.assembleia.domain.associate.AssociateSearchQuery;
+import br.com.dbccompany.assembleia.domain.clients.UsersClient;
+import br.com.dbccompany.assembleia.domain.clients.ValidateDocumentOutput;
 import br.com.dbccompany.assembleia.domain.pagination.Pagination;
 import br.com.dbccompany.assembleia.infrastructure.associate.persistence.AssociateJpaEntity;
 import br.com.dbccompany.assembleia.infrastructure.associate.persistence.AssociateRepository;
@@ -22,9 +24,11 @@ import static br.com.dbccompany.assembleia.infrastructure.utils.SpecificationUti
 public class AssociateDefaultMySQLGateway implements AssociateGateway {
 
     private final AssociateRepository associateRepository;
+    private final UsersClient usersClient;
 
-    public AssociateDefaultMySQLGateway(final AssociateRepository associateRepository) {
+    public AssociateDefaultMySQLGateway(final AssociateRepository associateRepository, final UsersClient usersClient) {
         this.associateRepository = Objects.requireNonNull(associateRepository);
+        this.usersClient = Objects.requireNonNull(usersClient);
     }
 
     @Override
@@ -49,10 +53,9 @@ public class AssociateDefaultMySQLGateway implements AssociateGateway {
         return this.associateRepository.existsByDocument(document);
     }
 
-    // TODO procurar uma API que receba o CPF e retorne se é válido ou não
     @Override
-    public boolean isDocumentValid(final String document) {
-        return true;
+    public ValidateDocumentOutput isDocumentValid(final String document) {
+        return usersClient.validateDocument(document);
     }
 
     @Override

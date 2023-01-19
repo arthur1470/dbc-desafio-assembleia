@@ -8,6 +8,7 @@ import br.com.dbccompany.assembleia.domain.agenda.votesession.VoteSessionID;
 import br.com.dbccompany.assembleia.domain.associate.Associate;
 import br.com.dbccompany.assembleia.domain.associate.AssociateGateway;
 import br.com.dbccompany.assembleia.domain.associate.AssociateID;
+import br.com.dbccompany.assembleia.domain.clients.ValidateDocumentOutput;
 import br.com.dbccompany.assembleia.domain.exceptions.DomainException;
 import br.com.dbccompany.assembleia.domain.exceptions.NotFoundException;
 import br.com.dbccompany.assembleia.domain.utils.InstantUtils;
@@ -68,6 +69,9 @@ class CreateAgendaVoteUseCaseTest {
         when(associateGateway.findById(anAssociateId))
                 .thenReturn(Optional.of(anAssociate));
 
+        when(associateGateway.isDocumentValid(any()))
+                .thenReturn(new ValidateDocumentOutput(true,"ABLE_TO_VOTE"));
+
         when(agendaGateway.existsByAssociateAndVoteSession(anAssociateId, aVoteSessionId))
                 .thenReturn(false);
 
@@ -123,6 +127,9 @@ class CreateAgendaVoteUseCaseTest {
 
         when(associateGateway.findById(anAssociateId))
                 .thenReturn(Optional.of(anAssociate));
+
+        when(associateGateway.isDocumentValid(any()))
+                .thenReturn(new ValidateDocumentOutput(true,"ABLE_TO_VOTE"));
 
         when(agendaGateway.existsByAssociateAndVoteSession(anAssociateId, aVoteSessionId))
                 .thenReturn(false);
@@ -250,6 +257,9 @@ class CreateAgendaVoteUseCaseTest {
 
         when(associateGateway.findById(anAssociateId))
                 .thenReturn(Optional.of(anAssociate));
+
+        when(associateGateway.isDocumentValid(any()))
+                .thenReturn(new ValidateDocumentOutput(true,"ABLE_TO_VOTE"));
 
         when(agendaGateway.existsByAssociateAndVoteSession(anAssociateId, aVoteSessionId))
                 .thenReturn(false);

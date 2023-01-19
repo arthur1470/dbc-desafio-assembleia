@@ -34,7 +34,7 @@ public class DefaultCreateAssociateUseCase extends CreateAssociateUseCase {
             throw DomainException.with(Error.with(errorMessage));
         }
 
-        final var isDocumentValid = associateGateway.isDocumentValid(aDocument);
+        final var isDocumentValid = associateGateway.isDocumentValid(aDocument).isValid();
         if (!isDocumentValid) {
             final var errorMessage = "'document' %s is invalid".formatted(aDocument);
             throw DomainException.with(Error.with(errorMessage));

@@ -54,7 +54,7 @@ class AssociateE2ETest {
         assertEquals(0, associateRepository.count());
 
         final var expectedName = "Joao da Silva";
-        final var expectedDocument = "12345678901";
+        final var expectedDocument = "86400464093";
         final var expectedIsActive = true;
 
         final var actualId = givenAnAssociate(expectedName, expectedDocument, expectedIsActive);
@@ -77,7 +77,7 @@ class AssociateE2ETest {
         assertEquals(0, associateRepository.count());
 
         final var expectedName = "Joao da Silva";
-        final var expectedDocument = "12345678901";
+        final var expectedDocument = "98597892072";
         final var expectedIsActive = false;
 
         final var actualId = givenAnAssociate(expectedName, expectedDocument, expectedIsActive);
@@ -163,9 +163,9 @@ class AssociateE2ETest {
         Assertions.assertTrue(MYSQL_CONTAINER.isRunning());
         assertEquals(0, associateRepository.count());
 
-        givenAnAssociate("Andre", "12345678901", true);
-        givenAnAssociate("Bruna", "12345678902", true);
-        givenAnAssociate("Camila", "12345678903", true);
+        givenAnAssociate("Andre", "86400464093", true);
+        givenAnAssociate("Bruna", "37491361064", true);
+        givenAnAssociate("Camila", "05143130050", true);
 
         assertEquals(3, associateRepository.count());
 
@@ -206,9 +206,9 @@ class AssociateE2ETest {
         Assertions.assertTrue(MYSQL_CONTAINER.isRunning());
         assertEquals(0, associateRepository.count());
 
-        givenAnAssociate("Andre", "12345678901", true);
-        givenAnAssociate("Bruna", "12345678902", true);
-        givenAnAssociate("Camila", "12345678903", true);
+        givenAnAssociate("Andre", "22963542038", true);
+        givenAnAssociate("Bruna", "83304070044", true);
+        givenAnAssociate("Camila", "69296507065", true);
 
         assertEquals(3, associateRepository.count());
 
@@ -227,9 +227,9 @@ class AssociateE2ETest {
         Assertions.assertTrue(MYSQL_CONTAINER.isRunning());
         assertEquals(0, associateRepository.count());
 
-        givenAnAssociate("Bruna", "12345678902", true);
-        givenAnAssociate("Camila", "12345678903", true);
-        givenAnAssociate("Andre", "12345678901", true);
+        givenAnAssociate("Bruna", "17236228001", true);
+        givenAnAssociate("Camila", "39004233008", true);
+        givenAnAssociate("Andre", "13598451008", true);
 
         assertEquals(3, associateRepository.count());
 

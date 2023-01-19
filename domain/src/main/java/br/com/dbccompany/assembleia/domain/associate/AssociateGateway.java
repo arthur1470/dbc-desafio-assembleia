@@ -1,5 +1,6 @@
 package br.com.dbccompany.assembleia.domain.associate;
 
+import br.com.dbccompany.assembleia.domain.clients.ValidateDocumentOutput;
 import br.com.dbccompany.assembleia.domain.pagination.Pagination;
 
 import java.util.Optional;
@@ -13,7 +14,7 @@ public interface AssociateGateway {
 
     boolean existsByDocument(String aDocument);
 
-    boolean isDocumentValid(String aDocument);
+    ValidateDocumentOutput isDocumentValid(String aDocument);
 
     Pagination<Associate> findAll(AssociateSearchQuery aQuery);
 }

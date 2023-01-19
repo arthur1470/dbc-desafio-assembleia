@@ -1,6 +1,7 @@
 package br.com.dbccompany.assembleia.application.associate.create;
 
 import br.com.dbccompany.assembleia.domain.associate.AssociateGateway;
+import br.com.dbccompany.assembleia.domain.clients.ValidateDocumentOutput;
 import br.com.dbccompany.assembleia.domain.exceptions.DomainException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,7 +49,7 @@ class CreateAssociateUseCaseTest {
                 .thenReturn(false);
 
         when(associateGateway.isDocumentValid(any()))
-                .thenReturn(true);
+                .thenReturn(new ValidateDocumentOutput(true,"ABLE_TO_VOTE"));
 
         when(associateGateway.create(any()))
                 .thenAnswer(returnsFirstArg());
@@ -88,7 +89,7 @@ class CreateAssociateUseCaseTest {
                 .thenReturn(false);
 
         when(associateGateway.isDocumentValid(any()))
-                .thenReturn(true);
+                .thenReturn(new ValidateDocumentOutput(true,"ABLE_TO_VOTE"));
 
         when(associateGateway.create(any()))
                 .thenAnswer(returnsFirstArg());
@@ -160,7 +161,7 @@ class CreateAssociateUseCaseTest {
                 .thenReturn(false);
 
         when(associateGateway.isDocumentValid(any()))
-                .thenReturn(false);
+                .thenReturn(new ValidateDocumentOutput(false,"UNABLE_TO_VOTE"));
 
         // when
         final var actualException = assertThrows(

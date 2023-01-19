@@ -26,7 +26,7 @@ class CreateAssociateUseCaseIT {
     @Test
     void givenAValidCommand_whenCallsCreateAssociate_shouldReturnAssociateId() {
         final var expectedName = "Joao da Silva";
-        final var expectedDocument = "12345678901";
+        final var expectedDocument = "86400464093";
         final var expectedIsActive = true;
 
         final var aCommand = CreateAssociateCommand.with(
@@ -58,7 +58,7 @@ class CreateAssociateUseCaseIT {
     @Test
     void givenAValidCommandWithInactiveAssociate_whenCallsCreateAssociate_shouldReturnInactiveAssociateId() {
         final var expectedName = "Joao da Silva";
-        final var expectedDocument = "12345678901";
+        final var expectedDocument = "86400464093";
         final var expectedIsActive = false;
 
         final var aCommand = CreateAssociateCommand.with(
@@ -118,7 +118,7 @@ class CreateAssociateUseCaseIT {
     @Test
     void givenAValidCommand_whenGatewayThrowsRandomException_shouldReturnAnException() {
         final var expectedName = "Joao da Silva";
-        final var expectedDocument = "12345678901";
+        final var expectedDocument = "06986509057";
         final var expectedIsActive = true;
         final var expectedErrorMessage = "Gateway error";
 

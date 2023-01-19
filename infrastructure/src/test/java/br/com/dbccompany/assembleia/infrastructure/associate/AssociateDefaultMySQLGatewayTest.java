@@ -110,9 +110,9 @@ class AssociateDefaultMySQLGatewayTest {
 
     @Test
     void givenAValidAssociateDocument_whenCallsIsDocumentValid_shouldReturnTrue() {
-        final var expectedDocument = "12345678901";
+        final var expectedDocument = "86400464093";
 
-        final var actualResult = associateGateway.isDocumentValid(expectedDocument);
+        final var actualResult = associateGateway.isDocumentValid(expectedDocument).isValid();
 
         assertTrue(actualResult);
     }

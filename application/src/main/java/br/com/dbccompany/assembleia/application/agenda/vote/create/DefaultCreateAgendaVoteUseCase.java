@@ -47,14 +47,19 @@ public class DefaultCreateAgendaVoteUseCase extends CreateAgendaVoteUseCase {
     }
 
     private void validateAssociateConstraints(final AssociateID anAssociateId, final VoteSessionID aSessionId) {
-        associateGateway.findById(anAssociateId).ifPresentOrElse(associate -> {
-            if (!associate.isActive())
-                throw DomainException.with("Associate %s is currently inactive".formatted(anAssociateId.getValue()));
-        }, () -> {
-            throw NotFoundException.with(Associate.class, anAssociateId);
-        });
+        final var anAssociate = associateGateway.findById(anAssociateId)
+                .orElseThrow(() -> NotFoundException.with(Associate.class, anAssociateId));
+
+        if (!anAssociate.isActive())
+            throw DomainException.with("Associate %s is currently inactive".formatted(anAssociateId.getValue()));
 
         if (agendaGateway.existsByAssociateAndVoteSession(anAssociateId, aSessionId))
             throw DomainException.with("Associate already voted for this agenda");
+
+        final var aDocumentValidation =
+                associateGateway.isDocumentValid(anAssociate.getDocument());
+
+        if (aDocumentValidation.status().equalsIgnoreCase("UNABLE_TO_VOTE"))
+            throw DomainException.with("Associate %s is unable to vote".formatted(anAssociate.getDocument()));
     }
 }

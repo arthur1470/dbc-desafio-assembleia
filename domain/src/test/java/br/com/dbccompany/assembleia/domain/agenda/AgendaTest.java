@@ -295,16 +295,14 @@ class AgendaTest {
         final var expectedName = "Agenda Importante";
         final var expectedDescription = "Essa é uma agenda muito importante que todos devem votar!";
         final var expectedIsActive = true;
-        final var expectedEndDate = InstantUtils.now().plus(Duration.ofMillis(10));
+        final var expectedEndDate = InstantUtils.now();
         final var anAgenda = Agenda.newAgenda(expectedName, expectedDescription, expectedIsActive)
                 .startVoteSession(expectedEndDate);
 
         final var expectedErrorMessage = "This agenda does not have an active voting session";
 
-        Thread.sleep(12);
-
         // when
-        final var actualException = Assertions.assertThrows(
+        final var actualException = Assertions.assertThrowsExactly(
                 DomainException.class,
                 () -> anAgenda.addVote(newVote(YES, unique()))
         );
