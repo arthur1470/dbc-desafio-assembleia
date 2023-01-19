@@ -1,10 +1,19 @@
 package br.com.dbccompany.assembleia.e2e;
 
 import br.com.dbccompany.assembleia.E2ETest;
+import br.com.dbccompany.assembleia.domain.agenda.Agenda;
 import br.com.dbccompany.assembleia.domain.agenda.AgendaID;
+import br.com.dbccompany.assembleia.domain.agenda.vote.Vote;
+import br.com.dbccompany.assembleia.domain.associate.Associate;
+import br.com.dbccompany.assembleia.domain.utils.InstantUtils;
 import br.com.dbccompany.assembleia.infrastructure.agenda.models.AgendaResponse;
 import br.com.dbccompany.assembleia.infrastructure.agenda.models.CreateAgendaRequest;
+import br.com.dbccompany.assembleia.infrastructure.agenda.persistence.AgendaJpaEntity;
 import br.com.dbccompany.assembleia.infrastructure.agenda.persistence.AgendaRepository;
+import br.com.dbccompany.assembleia.infrastructure.agenda.vote.models.CreateAgendaVoteRequest;
+import br.com.dbccompany.assembleia.infrastructure.agenda.votesession.models.CreateAgendaVoteSessionRequest;
+import br.com.dbccompany.assembleia.infrastructure.associate.persistence.AssociateJpaEntity;
+import br.com.dbccompany.assembleia.infrastructure.associate.persistence.AssociateRepository;
 import br.com.dbccompany.assembleia.infrastructure.configuration.json.Json;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -20,13 +29,15 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.Map;
+import java.util.stream.Stream;
 
+import static br.com.dbccompany.assembleia.domain.agenda.vote.VoteType.NO;
+import static br.com.dbccompany.assembleia.domain.agenda.vote.VoteType.YES;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @E2ETest
 @Testcontainers
@@ -36,6 +47,8 @@ class AgendaE2ETest {
     private MockMvc mvc;
     @Autowired
     private AgendaRepository agendaRepository;
+    @Autowired
+    private AssociateRepository associateRepository;
 
     @Container
     private static final MySQLContainer MYSQL_CONTAINER =
@@ -227,6 +240,407 @@ class AgendaE2ETest {
                 .andExpect(jsonPath("$.items[1].name", equalTo("Pauta Saude")))
                 .andExpect(jsonPath("$.items[2].name", equalTo("Pauta Diversidade")));
 
+    }
+
+    @Test
+    void ItShouldBeAbleToStartAVoteSession() throws Exception {
+        Assertions.assertTrue(MYSQL_CONTAINER.isRunning());
+        assertEquals(0, agendaRepository.count());
+
+        final var agendaId = givenAnAgenda("Pauta Saude", "C", true)
+                .getValue();
+
+        assertEquals(1, agendaRepository.count());
+
+        final var aRequestBody = new CreateAgendaVoteSessionRequest(
+                "HOURS",
+                1
+        );
+
+        final var aRequest =
+                MockMvcRequestBuilders.post("/agendas/{id}/vote-sessions", agendaId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(Json.writeValueAsString(aRequestBody));
+
+        this.mvc.perform(aRequest)
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE));
+
+        final var actualSession = retrieveAnAgenda(agendaId).voteSession();
+
+        assertNotNull(actualSession.voteSessionId());
+        assertTrue(actualSession.isVoteSessionActive());
+        assertNotNull(actualSession.voteSessionStartedAt());
+        assertNotNull(actualSession.voteSessionEndAt());
+        assertTrue(actualSession.voteSessionStartedAt().isBefore(InstantUtils.now()));
+        assertTrue(actualSession.voteSessionEndAt().isAfter(InstantUtils.now()));
+
+    }
+
+    @Test
+    void ItShouldNotBeAbleToStartAVoteSessionIfAgendaAlreadyHasAVoteSession() throws Exception {
+        Assertions.assertTrue(MYSQL_CONTAINER.isRunning());
+        assertEquals(0, agendaRepository.count());
+
+        final var expectedErrorMessage = "This agenda already has a voting session";
+        final var agendaId = givenAnAgenda("Pauta Saude", "C", true)
+                .getValue();
+
+        assertEquals(1, agendaRepository.count());
+
+        final var aRequestBody = new CreateAgendaVoteSessionRequest(
+                "HOURS",
+                1
+        );
+
+        final var aRequest =
+                MockMvcRequestBuilders.post("/agendas/{id}/vote-sessions", agendaId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(Json.writeValueAsString(aRequestBody));
+
+        this.mvc.perform(aRequest)
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE));
+
+        this.mvc.perform(aRequest)
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.errors[0].message", equalTo(expectedErrorMessage)));
+    }
+
+    @Test
+    void ItShouldBeAbleToVoteYesToAnAgenda() throws Exception {
+        Assertions.assertTrue(MYSQL_CONTAINER.isRunning());
+        assertEquals(0, agendaRepository.count());
+        assertEquals(0, associateRepository.count());
+
+        final var anAssociate = Associate.newAssociate("Joao", "12345678901", true);
+        associateRepository.saveAndFlush(AssociateJpaEntity.from(anAssociate));
+        assertEquals(1, associateRepository.count());
+
+        final var expectedTotalVotes = 1;
+        final var expectedYesVotes = 1;
+        final var expectedNoVotes = 0;
+        final var expectedYesVotesPercentage = "100,00";
+        final var expectedNoVotesPercentage = "0,00";
+
+        final var agendaId = givenAnAgenda("Pauta Saude", "C", true)
+                .getValue();
+
+        assertEquals(1, agendaRepository.count());
+
+
+        final var aSessionRequestBody = new CreateAgendaVoteSessionRequest(
+                "HOURS",
+                1
+        );
+
+        final var aVoteSessionRequest =
+                MockMvcRequestBuilders.post("/agendas/{id}/vote-sessions", agendaId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(Json.writeValueAsString(aSessionRequestBody));
+
+        final var sessionId = this.mvc.perform(aVoteSessionRequest)
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE))
+                .andReturn()
+                .getResponse()
+                .getHeader("location")
+                .replace(
+                        "/agendas/" + agendaId + "/vote-sessions/",
+                        ""
+                );
+
+        final var aVoteRequestBody = new CreateAgendaVoteRequest(
+                "yes",
+                anAssociate.getId().getValue()
+        );
+
+        final var aVoteRequest =
+                MockMvcRequestBuilders.post("/agendas/{agendaId}/vote-sessions/{sessionId}/votes", agendaId, sessionId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(Json.writeValueAsString(aVoteRequestBody));
+
+        this.mvc.perform(aVoteRequest)
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE));
+
+        final var actualVotes = retrieveAnAgenda(agendaId).votes();
+
+        assertEquals(expectedTotalVotes, actualVotes.totalVotes());
+        assertEquals(expectedYesVotes, actualVotes.yes());
+        assertEquals(expectedNoVotes, actualVotes.no());
+        assertEquals(expectedYesVotesPercentage, actualVotes.yesPercentage());
+        assertEquals(expectedNoVotesPercentage, actualVotes.noPercentage());
+    }
+
+    @Test
+    void ItShouldBeAbleToVoteNoToAnAgenda() throws Exception {
+        Assertions.assertTrue(MYSQL_CONTAINER.isRunning());
+        assertEquals(0, agendaRepository.count());
+        assertEquals(0, associateRepository.count());
+
+        final var anAssociate = Associate.newAssociate("Joao", "12345678901", true);
+        associateRepository.saveAndFlush(AssociateJpaEntity.from(anAssociate));
+        assertEquals(1, associateRepository.count());
+
+        final var expectedTotalVotes = 1;
+        final var expectedYesVotes = 0;
+        final var expectedNoVotes = 1;
+        final var expectedYesVotesPercentage = "0,00";
+        final var expectedNoVotesPercentage = "100,00";
+
+        final var agendaId = givenAnAgenda("Pauta Saude", "C", true)
+                .getValue();
+
+        assertEquals(1, agendaRepository.count());
+
+
+        final var aSessionRequestBody = new CreateAgendaVoteSessionRequest(
+                "HOURS",
+                1
+        );
+
+        final var aVoteSessionRequest =
+                MockMvcRequestBuilders.post("/agendas/{id}/vote-sessions", agendaId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(Json.writeValueAsString(aSessionRequestBody));
+
+        final var sessionId = this.mvc.perform(aVoteSessionRequest)
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE))
+                .andReturn()
+                .getResponse()
+                .getHeader("location")
+                .replace(
+                        "/agendas/" + agendaId + "/vote-sessions/",
+                        ""
+                );
+
+        final var aVoteRequestBody = new CreateAgendaVoteRequest(
+                "no",
+                anAssociate.getId().getValue()
+        );
+
+        final var aVoteRequest =
+                MockMvcRequestBuilders.post("/agendas/{agendaId}/vote-sessions/{sessionId}/votes", agendaId, sessionId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(Json.writeValueAsString(aVoteRequestBody));
+
+        this.mvc.perform(aVoteRequest)
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE));
+
+        final var actualVotes = retrieveAnAgenda(agendaId).votes();
+
+        assertEquals(expectedTotalVotes, actualVotes.totalVotes());
+        assertEquals(expectedYesVotes, actualVotes.yes());
+        assertEquals(expectedNoVotes, actualVotes.no());
+        assertEquals(expectedYesVotesPercentage, actualVotes.yesPercentage());
+        assertEquals(expectedNoVotesPercentage, actualVotes.noPercentage());
+    }
+
+    @Test
+    void ItShouldNotAbleToVoteTwiceToAnAgenda() throws Exception {
+        Assertions.assertTrue(MYSQL_CONTAINER.isRunning());
+        assertEquals(0, agendaRepository.count());
+        assertEquals(0, associateRepository.count());
+
+        final var anAssociate = Associate.newAssociate("Joao", "12345678901", true);
+        associateRepository.saveAndFlush(AssociateJpaEntity.from(anAssociate));
+        assertEquals(1, associateRepository.count());
+
+        final var expectedErrorMessage = "Associate already voted for this agenda";
+
+        final var agendaId = givenAnAgenda("Pauta Saude", "C", true)
+                .getValue();
+
+        assertEquals(1, agendaRepository.count());
+
+
+        final var aSessionRequestBody = new CreateAgendaVoteSessionRequest(
+                "HOURS",
+                1
+        );
+
+        final var aVoteSessionRequest =
+                MockMvcRequestBuilders.post("/agendas/{id}/vote-sessions", agendaId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(Json.writeValueAsString(aSessionRequestBody));
+
+        final var sessionId = this.mvc.perform(aVoteSessionRequest)
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE))
+                .andReturn()
+                .getResponse()
+                .getHeader("location")
+                .replace(
+                        "/agendas/" + agendaId + "/vote-sessions/",
+                        ""
+                );
+
+        final var aVoteRequestBody = new CreateAgendaVoteRequest(
+                "no",
+                anAssociate.getId().getValue()
+        );
+
+        final var aVoteRequest =
+                MockMvcRequestBuilders.post("/agendas/{agendaId}/vote-sessions/{sessionId}/votes", agendaId, sessionId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(Json.writeValueAsString(aVoteRequestBody));
+
+        this.mvc.perform(aVoteRequest)
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE));
+
+        this.mvc.perform(aVoteRequest)
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.errors[0].message", equalTo(expectedErrorMessage)));
+
+    }
+
+    @Test
+    void ItShouldNotAbleToVoteToAnAgendaWhenAssociateIsInactive() throws Exception {
+        Assertions.assertTrue(MYSQL_CONTAINER.isRunning());
+        assertEquals(0, agendaRepository.count());
+        assertEquals(0, associateRepository.count());
+
+        final var anAssociate = Associate.newAssociate("Joao", "12345678901", false);
+        associateRepository.saveAndFlush(AssociateJpaEntity.from(anAssociate));
+        assertEquals(1, associateRepository.count());
+
+        final var expectedErrorMessage =
+                "Associate %s is currently inactive".formatted(anAssociate.getId().getValue());
+
+        final var agendaId = givenAnAgenda("Pauta Saude", "C", true)
+                .getValue();
+
+        assertEquals(1, agendaRepository.count());
+
+
+        final var aSessionRequestBody = new CreateAgendaVoteSessionRequest(
+                "HOURS",
+                1
+        );
+
+        final var aVoteSessionRequest =
+                MockMvcRequestBuilders.post("/agendas/{id}/vote-sessions", agendaId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(Json.writeValueAsString(aSessionRequestBody));
+
+        final var sessionId = this.mvc.perform(aVoteSessionRequest)
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE))
+                .andReturn()
+                .getResponse()
+                .getHeader("location")
+                .replace(
+                        "/agendas/" + agendaId + "/vote-sessions/",
+                        ""
+                );
+
+        final var aVoteRequestBody = new CreateAgendaVoteRequest(
+                "no",
+                anAssociate.getId().getValue()
+        );
+
+        final var aVoteRequest =
+                MockMvcRequestBuilders.post("/agendas/{agendaId}/vote-sessions/{sessionId}/votes", agendaId, sessionId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(Json.writeValueAsString(aVoteRequestBody));
+
+        this.mvc.perform(aVoteRequest)
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.errors[0].message", equalTo(expectedErrorMessage)));
+    }
+
+    @Test
+    void ItShouldNotAbleToVoteToAnAgendaWhenVoteSessionIsOver() throws Exception {
+        Assertions.assertTrue(MYSQL_CONTAINER.isRunning());
+        assertEquals(0, agendaRepository.count());
+        assertEquals(0, associateRepository.count());
+
+        final var anAssociate = Associate.newAssociate("Joao", "12345678901", true);
+        associateRepository.saveAndFlush(AssociateJpaEntity.from(anAssociate));
+        assertEquals(1, associateRepository.count());
+
+        final var anAgenda =
+                Agenda.newAgenda("Pauta Saude", "C", true).startVoteSession(InstantUtils.now());
+        agendaRepository.saveAndFlush(AgendaJpaEntity.from(anAgenda));
+        assertEquals(1, agendaRepository.count());
+
+        final var expectedErrorMessage = "This agenda does not have an active voting session";
+
+        final var aVoteRequestBody = new CreateAgendaVoteRequest(
+                "no",
+                anAssociate.getId().getValue()
+        );
+
+        final var aVoteRequest = MockMvcRequestBuilders.post(
+                        "/agendas/{agendaId}/vote-sessions/{sessionId}/votes",
+                        anAgenda.getId().getValue(),
+                        anAgenda.getVoteSession().getId().getValue()
+                )
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(Json.writeValueAsString(aVoteRequestBody));
+
+        this.mvc.perform(aVoteRequest)
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.errors[0].message", equalTo(expectedErrorMessage)));
+    }
+
+    @Test
+    void ItShouldAbleToListVotes() throws Exception {
+        Assertions.assertTrue(MYSQL_CONTAINER.isRunning());
+
+        assertEquals(0, agendaRepository.count());
+        assertEquals(0, associateRepository.count());
+
+        final var associateJoao = Associate.newAssociate("Joao", "12345678901", true);
+        final var associatePedro = Associate.newAssociate("Pedro", "12345678902", true);
+        final var associateMaria = Associate.newAssociate("Maria", "12345678903", true);
+
+        Stream.of(associateJoao, associatePedro, associateMaria)
+                .map(AssociateJpaEntity::from)
+                .forEach(associateRepository::saveAndFlush);
+        assertEquals(3, associateRepository.count());
+
+        final var anAgenda = Agenda.newAgenda("Pauta Legal", null, true)
+                .startVoteSession(InstantUtils.now().plusSeconds(3))
+                .addVote(Vote.newVote(YES, associateJoao.getId()))
+                .addVote(Vote.newVote(YES, associatePedro.getId()))
+                .addVote(Vote.newVote(NO, associateMaria.getId()));
+
+        final var agendaId = anAgenda.getId().getValue();
+        final var sessionId = anAgenda.getVoteSession().getId().getValue();
+
+        agendaRepository.saveAndFlush(AgendaJpaEntity.from(anAgenda));
+        assertEquals(1, agendaRepository.count());
+
+        final var expectedPage = 0;
+        final var expectedPerPage = 10;
+        final var expectedSort = "createdAt";
+        final var expectedDirection = "asc";
+
+        final var aListVotesRequest =
+                MockMvcRequestBuilders.get("/agendas/{agendaId}/vote-sessions/{sessionId}/votes", agendaId, sessionId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .queryParam("page", String.valueOf(expectedPage))
+                        .queryParam("perPage", String.valueOf(expectedPerPage))
+                        .queryParam("sort", expectedSort)
+                        .queryParam("dir", expectedDirection)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON);
+
+        mvc.perform(aListVotesRequest)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.current_page", equalTo(expectedPage)))
+                .andExpect(jsonPath("$.per_page", equalTo(expectedPerPage)))
+                .andExpect(jsonPath("$.total", equalTo(3)))
+                .andExpect(jsonPath("$.items", hasSize(3)));
     }
 
     private AgendaID givenAnAgenda(
