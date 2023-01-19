@@ -1,0 +1,287 @@
+{
+	"info": {
+		"_postman_id": "3f478fc3-47bd-408e-89d0-dcc22bc70dd0",
+		"name": "Desafio",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Criar Associates",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Camila Barreiros\",\n    \"document\": \"07789238000\",\n    \"is_active\": true\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrlV1}}/associates",
+					"host": [
+						"{{baseUrlV1}}"
+					],
+					"path": [
+						"associates"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listar Associates",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrlV1}}/associates?page=0&perPage=10&sort=name&dir=desc",
+					"host": [
+						"{{baseUrlV1}}"
+					],
+					"path": [
+						"associates"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "0"
+						},
+						{
+							"key": "perPage",
+							"value": "10"
+						},
+						{
+							"key": "sort",
+							"value": "name"
+						},
+						{
+							"key": "dir",
+							"value": "desc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Criar Agendas",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Pauta Esportes\",\n    \"description\": \"uma pauta para os esportes\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrlV1}}/agendas",
+					"host": [
+						"{{baseUrlV1}}"
+					],
+					"path": [
+						"agendas"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listar Agendas",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrlV1}}/agendas?page=0&perPage=10&sort=name&dir=desc",
+					"host": [
+						"{{baseUrlV1}}"
+					],
+					"path": [
+						"agendas"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "0"
+						},
+						{
+							"key": "perPage",
+							"value": "10"
+						},
+						{
+							"key": "sort",
+							"value": "name"
+						},
+						{
+							"key": "dir",
+							"value": "desc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Criar Agendas Vote Session",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"duration_type\": \"MINUTES\",\n    \"duration\": 10\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrlV1}}/agendas/:agendaId/vote-sessions",
+					"host": [
+						"{{baseUrlV1}}"
+					],
+					"path": [
+						"agendas",
+						":agendaId",
+						"vote-sessions"
+					],
+					"variable": [
+						{
+							"key": "agendaId",
+							"value": "fb9fca1f-fe1f-42c9-9282-deaf08bbdb9c"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Criar Agendas Vote",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"vote\": \"YES\",\n    \"associate_id\": \"03bc81f5-aabe-41d1-8d42-89634bf3760e\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrlV1}}/agendas/:agendaId/vote-sessions/:voteSessionId/votes",
+					"host": [
+						"{{baseUrlV1}}"
+					],
+					"path": [
+						"agendas",
+						":agendaId",
+						"vote-sessions",
+						":voteSessionId",
+						"votes"
+					],
+					"variable": [
+						{
+							"key": "agendaId",
+							"value": "fb9fca1f-fe1f-42c9-9282-deaf08bbdb9c"
+						},
+						{
+							"key": "voteSessionId",
+							"value": "f769f90b-e4cf-4bbf-91df-0bf7972a5685"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Buscar Agenda por Id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrlV1}}/agendas/:agendaId",
+					"host": [
+						"{{baseUrlV1}}"
+					],
+					"path": [
+						"agendas",
+						":agendaId"
+					],
+					"variable": [
+						{
+							"key": "agendaId",
+							"value": "fb9fca1f-fe1f-42c9-9282-deaf08bbdb9c"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Buscar Votes de uma Agenda",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrlV1}}/agendas/:agendaId/vote-sessions/:voteSessionId/votes",
+					"host": [
+						"{{baseUrlV1}}"
+					],
+					"path": [
+						"agendas",
+						":agendaId",
+						"vote-sessions",
+						":voteSessionId",
+						"votes"
+					],
+					"variable": [
+						{
+							"key": "agendaId",
+							"value": "fb9fca1f-fe1f-42c9-9282-deaf08bbdb9c"
+						},
+						{
+							"key": "voteSessionId",
+							"value": "f769f90b-e4cf-4bbf-91df-0bf7972a5685"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrlV1",
+			"value": "http://localhost:8080",
+			"type": "default"
+		}
+	]
+}
